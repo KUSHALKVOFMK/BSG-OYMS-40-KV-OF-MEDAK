@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
         unit_address: member.unit_address || "", mobile: member.mobile || "", email,
         joining_date: member.joining_date || null, investiture_date: member.investiture_date || null,
         leaving_date: member.leaving_date || null, troop_company: member.troop_company || "",
-        role_in_unit: member.role_in_unit || "Member",
+        role_in_unit: member.role_in_unit || "Member", stage_completion_dates: member.stage_completion_dates || {},
         bsg_uid: String(member.bsg_uid || "").trim() || null,
         unit: member.category || "Scout", verification_status: "pending",
         status: "active", account_status: "invited"
