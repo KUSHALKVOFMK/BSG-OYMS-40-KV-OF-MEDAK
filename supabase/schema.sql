@@ -156,7 +156,7 @@ create table if not exists public.registration_requests (
   email text default '',
   address text default '',
   submitted_at timestamptz not null default now(),
-  status text not null default 'pending'
+  status text not null default 'pending' check (status in ('pending','approved','rejected'))
 );
 
 create or replace function public.current_role()
@@ -199,12 +199,39 @@ create policy "members staff insert" on public.members for insert to authenticat
 create policy "members staff update" on public.members for update to authenticated using (public.is_staff()) with check (public.is_staff());
 create policy "members staff delete" on public.members for delete to authenticated using (public.current_role() in ('super_admin','school_admin'));
 
-create policy "attendance sessions staff manage" on public.attendance_sessions for all to authenticated using (public.is_staff() or public.current_role()='patrol_leader') with check (public.is_staff() or public.current_role()='patrol_leader');
-create policy "attendance records staff or patrol manage" on public.attendance_records for all to authenticated using (public.is_staff() or public.current_role()='patrol_leader') with check (public.is_staff() or public.current_role()='patrol_leader');
+create policy "attendance sessions staff read" on public.attendance_sessions for select to authenticated using (public.is_staff() or public.current_role()='patrol_leader');
+create policy "attendance sessions staff manage" on public.attendance_sessions for all to authenticated using (public.is_staff()) with check (public.is_staff());
+create policy "attendance records staff or assigned patrol read" on public.attendance_records for select to authenticated using (
+  public.is_staff() or exists (
+    select 1 from public.profiles p join public.members m on m.id=attendance_records.member_id
+    where p.id=auth.uid() and p.role='patrol_leader' and p.patrol_id=m.patrol_id
+  )
+);
+create policy "attendance records staff or assigned patrol manage" on public.attendance_records for all to authenticated using (
+  public.is_staff() or exists (
+    select 1 from public.profiles p join public.members m on m.id=attendance_records.member_id
+    where p.id=auth.uid() and p.role='patrol_leader' and p.patrol_id=m.patrol_id
+  )
+) with check (
+  public.is_staff() or exists (
+    select 1 from public.profiles p join public.members m on m.id=attendance_records.member_id
+    where p.id=auth.uid() and p.role='patrol_leader' and p.patrol_id=m.patrol_id
+  )
+);
 
 create policy "tests staff read" on public.tests for select to authenticated using (true);
 create policy "tests staff manage" on public.tests for all to authenticated using (public.is_staff()) with check (public.is_staff());
-create policy "results staff manage" on public.test_results for all to authenticated using (public.is_staff() or public.current_role()='patrol_leader') with check (public.is_staff() or public.current_role()='patrol_leader');
+create policy "results staff or assigned patrol manage" on public.test_results for all to authenticated using (
+  public.is_staff() or exists (
+    select 1 from public.profiles p join public.members m on m.id=test_results.member_id
+    where p.id=auth.uid() and p.role='patrol_leader' and p.patrol_id=m.patrol_id
+  )
+) with check (
+  public.is_staff() or exists (
+    select 1 from public.profiles p join public.members m on m.id=test_results.member_id
+    where p.id=auth.uid() and p.role='patrol_leader' and p.patrol_id=m.patrol_id
+  )
+);
 create policy "progression staff manage" on public.progression_records for all to authenticated using (public.is_staff()) with check (public.is_staff());
 
 create policy "events authenticated read" on public.events for select to authenticated using (true);
@@ -217,7 +244,7 @@ create policy "logbook own or staff" on public.logbook_entries for all to authen
 ) with check (
   public.is_staff() or exists (select 1 from public.profiles p where p.id=auth.uid() and p.member_id=logbook_entries.member_id)
 );
-create policy "public registration submit" on public.registration_requests for insert to anon, authenticated with check (true);
+create policy "public registration submit" on public.registration_requests for insert to anon, authenticated with check (status='pending');
 create policy "staff review registration" on public.registration_requests for all to authenticated using (public.is_staff()) with check (public.is_staff());
 
 -- IMPORTANT: Create the first Super Admin profile manually after creating that user in
