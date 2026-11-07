@@ -110,6 +110,7 @@ function App(){
   const [schoolOtp,setSchoolOtp]=useState('');
   const [schoolOtpSent,setSchoolOtpSent]=useState(false);
   const schoolRegistrationInProgress=useRef(false);
+  const requestedLoginRole=useRef(null);
   const [accountForm,setAccountForm]=useState({full_name:'',email:'',role:'unit_leader',unit_id:'',patrol_id:''});
   const [recoveryMode,setRecoveryMode]=useState(false);
   const [newPassword,setNewPassword]=useState('');
@@ -158,7 +159,8 @@ function App(){
       setNotice(application?.status==='pending'?'Your email is verified. The Super Admin must approve your Vidyalaya registration before School Admin access is activated.':'Your email is verified, but no OYMS role has been assigned. Contact the portal administrator.');
       await supabase.auth.signOut();setUser(null);setPage('home');return;
     }
-    if(loginRole&&loginMode&&p.role!==loginRole){setNotice('This account is registered as '+labelRole(p.role)+'. Please select the matching login type.');await supabase.auth.signOut();return;}
+    if(requestedLoginRole.current&&p.role!==requestedLoginRole.current){const expected=requestedLoginRole.current;requestedLoginRole.current=null;setNotice('This account is registered as '+labelRole(p.role)+', not '+labelRole(expected)+'. Please select the correct login type.');await supabase.auth.signOut();return;}
+    requestedLoginRole.current=null;
     setUser({...authUser,profile:p});setRole(p.role);setDemoMode(false);setLoginMode(false);setPage('dashboard');
     await loadRemoteData();
   }
@@ -191,8 +193,8 @@ function App(){
     setData(prev=>({...prev,[key]:prev[key].filter(x=>x.id!==id)}));setNotice('Record deleted.');
   }
   async function signIn(e){
-    e.preventDefault();if(!supabase){setNotice('Backend is not configured. Use a demo role to explore the interface.');return;}
-    setLoading(true);const {error}=await supabase.auth.signInWithPassword(login);
+    e.preventDefault();if(!supabase){setNotice('Backend is not configured.');return;}
+    requestedLoginRole.current=loginRole;setLoading(true);const {error}=await supabase.auth.signInWithPassword(login);
     setLoading(false);if(error)setNotice(error.message);
   }
   async function sendOtp(){
@@ -203,7 +205,7 @@ function App(){
   }
   async function verifyLoginOtp(e){
     e.preventDefault();if(!supabase||!login.email||!loginOtp.trim()){setNotice('Enter the email OTP.');return;}
-    setLoading(true);const {error}=await supabase.auth.verifyOtp({email:login.email,token:loginOtp.trim(),type:'email'});setLoading(false);if(error)setNotice(error.message);
+    requestedLoginRole.current=loginRole;setLoading(true);const {error}=await supabase.auth.verifyOtp({email:login.email,token:loginOtp.trim(),type:'email'});setLoading(false);if(error)setNotice(error.message);
   }
   async function sendSchoolOtp(e){
     e.preventDefault();if(!supabase){setNotice('Vidyalaya registration requires the configured email OTP backend.');return;}
