@@ -4,7 +4,7 @@ Hierarchical Online Youth Management System for **PM SHRI Kendriya Vidyalaya Ord
 
 ## Role hierarchy and account issue flow
 
-1. **Super Admin** — portal-level authority. The first Super Admin account is created manually in Supabase Auth and assigned the `super_admin` profile role using the SQL editor.
+1. **Super Admin** — exactly one portal-level authority. The only permitted Super Admin email is `kushalkvofmkbsgindiaoyms@gmail.com`. Public Super Admin registration is disabled. The database migration enforces one Super Admin row and restricts its email to this address. Create this one account manually in Supabase Authentication → Users using the supplied initial password, then assign its profile using the SQL below. Do not put the password in source code, SQL files, GitHub secrets committed to the repository, or browser code. Since the initial password was shared in chat, change it to a new private password before using the live portal.
 2. **Vidyalaya registration** — a Vidyalaya submits its school name, KVS division / affiliation code, address, principal / authorised contact and official email. An email OTP must be verified before the application is stored as verified and pending.
 3. **School / Group Admin** — only the Super Admin can approve a verified Vidyalaya application. Approval creates the Vidyalaya record, Scout Unit, Guide Company, five patrols, and activates the applicant as the School / Group Admin.
 4. **Unit Leader** — the School / Group Admin creates the Scout Master / Guide Captain account for a selected Scout Unit or Guide Company. The system emails an invitation.
@@ -49,9 +49,9 @@ Aadhaar is deliberately not collected in the general portal profile. It is a sen
 10. Create the first Super Admin in Supabase Authentication. Copy that user's Auth UUID and insert the initial profile in the SQL Editor:
     ```sql
     insert into public.profiles (id, full_name, email, role)
-    values ('AUTH-USER-UUID', 'Portal Super Admin', 'admin@example.com', 'super_admin');
+    values ('AUTH-USER-UUID', 'KV Medak OYMS Super Admin', 'kushalkvofmkbsgindiaoyms@gmail.com', 'super_admin');
     ```
-    Replace the example UUID, name and email with the actual Super Admin account details.
+    Replace `AUTH-USER-UUID` with the UUID of the one user created in Supabase Auth. Use the exact designated email above. This insert must be performed only once.
 
 ## Email onboarding test
 
