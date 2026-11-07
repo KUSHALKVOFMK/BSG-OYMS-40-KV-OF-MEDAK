@@ -156,8 +156,10 @@ create table if not exists public.registration_requests (
   email text default '',
   address text default '',
   submitted_at timestamptz not null default now(),
+  created_at timestamptz not null default now(),
   status text not null default 'pending' check (status in ('pending','approved','rejected'))
 );
+alter table public.registration_requests add column if not exists created_at timestamptz not null default now();
 
 create or replace function public.current_role()
 returns text language sql stable security definer set search_path = public
