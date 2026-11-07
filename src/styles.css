@@ -9,3 +9,5 @@
 @media print{body *{visibility:hidden}.cert-preview,.cert-preview *{visibility:visible}.cert-preview{position:absolute;inset:0;margin:0;width:100%;height:100%;border-width:8px}.cert-actions,.sidebar,.topbar,.app-footer{display:none!important}}
 
 .login-links{display:flex;justify-content:space-between;gap:10px;margin-top:2px}.login-links button{border:0;background:transparent;color:#514a9a;font-size:10px;font-weight:700;padding:4px 0}.login-links button:disabled{opacity:.5}@media(max-width:480px){.login-links{flex-direction:column;align-items:flex-start;gap:3px}}
+
+.login-card>label{display:flex;flex-direction:column;gap:6px;font-size:10px;color:#656982;font-weight:700;margin:12px 0}.login-card>label select,.otp-login-form input{width:100%;border:1px solid #dfe1eb;border-radius:6px;padding:10px;font-size:11px;color:#343750;background:#fff}.otp-login-form{display:grid;gap:10px;margin-top:13px;padding-top:13px;border-top:1px solid #eff0f5}.otp-login-form label{display:flex;flex-direction:column;gap:6px;font-size:10px;color:#656982;font-weight:700}
