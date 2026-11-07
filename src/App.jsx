@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import {
   Activity, AlertCircle, ArrowDownToLine, Award, Bell, BookOpen, CalendarDays, Check, CheckCircle2,
@@ -109,6 +109,7 @@ function App(){
   const [schoolForm,setSchoolForm]=useState({school_name:'',affiliation_number:'',division:'KVS Hyderabad Division',school_address:'',principal_name:'',contact_person:'',email:'',mobile:''});
   const [schoolOtp,setSchoolOtp]=useState('');
   const [schoolOtpSent,setSchoolOtpSent]=useState(false);
+  const schoolRegistrationInProgress=useRef(false);
   const [accountForm,setAccountForm]=useState({full_name:'',email:'',role:'unit_leader',unit_id:'',patrol_id:''});
   const [recoveryMode,setRecoveryMode]=useState(false);
   const [newPassword,setNewPassword]=useState('');
@@ -150,6 +151,7 @@ function App(){
     return ()=>sub.subscription.unsubscribe();
   },[]);
   async function loadProfile(authUser){
+    if(schoolRegistrationInProgress.current)return;
     const {data:p,error}=await supabase.from('profiles').select('*').eq('id',authUser.id).single();
     if(error||!p){
       const {data:application}=await supabase.from('school_applications').select('status').eq('applicant_user_id',authUser.id).maybeSingle();
@@ -171,7 +173,8 @@ function App(){
   async function saveRow(key,row){
     const table=TABLES[key];
     if(supabase&&!demoMode){
-      const {data:result,error}=await supabase.from(table).upsert(row).select().single();
+      const scopedRow={...row,school_id:row.school_id||user?.profile?.school_id||null};
+      const {data:result,error}=await supabase.from(table).upsert(scopedRow).select().single();
       if(error){setNotice(error.message);return null;}
       setData(prev=>({...prev,[key]:[result,...prev[key].filter(x=>x.id!==result.id)]}));return result;
     }
@@ -210,13 +213,13 @@ function App(){
   }
   async function verifySchoolOtp(e){
     e.preventDefault();if(!supabase||!schoolOtp.trim())return;
-    setLoading(true);const {data:verified,error}=await supabase.auth.verifyOtp({email:schoolForm.email.trim().toLowerCase(),token:schoolOtp.trim(),type:'email'});
-    if(error||!verified.user){setLoading(false);setNotice(error?.message||'Email verification failed.');return;}
+    schoolRegistrationInProgress.current=true;setLoading(true);const {data:verified,error}=await supabase.auth.verifyOtp({email:schoolForm.email.trim().toLowerCase(),token:schoolOtp.trim(),type:'email'});
+    if(error||!verified.user){schoolRegistrationInProgress.current=false;setLoading(false);setNotice(error?.message||'Email verification failed.');return;}
     const application={...schoolForm,applicant_user_id:verified.user.id,email:schoolForm.email.trim().toLowerCase(),email_verified:true,status:'pending'};
     const {error:insertError}=await supabase.from('school_applications').insert(application);
     setLoading(false);
-    if(insertError){setNotice(insertError.message);return;}
-    await supabase.auth.signOut();setSchoolOtpSent(false);setSchoolOtp('');setSchoolForm({school_name:'',affiliation_number:'',division:'KVS Hyderabad Division',school_address:'',principal_name:'',contact_person:'',email:'',mobile:''});setPage('home');setNotice('Vidyalaya email verified. Your registration is now pending Super Admin approval. School Admin access will be activated only after approval.');
+    if(insertError){schoolRegistrationInProgress.current=false;setNotice(insertError.message);await supabase.auth.signOut();return;}
+    await supabase.auth.signOut();schoolRegistrationInProgress.current=false;setSchoolOtpSent(false);setSchoolOtp('');setSchoolForm({school_name:'',affiliation_number:'',division:'KVS Hyderabad Division',school_address:'',principal_name:'',contact_person:'',email:'',mobile:''});setPage('home');setNotice('Vidyalaya email verified. Your registration is now pending Super Admin approval. School Admin access will be activated only after approval.');
   }
   async function createRoleAccount(e){
     e.preventDefault();if(!supabase||demoMode){setNotice('Connect the production Supabase backend to create real login accounts.');return;}
@@ -263,6 +266,7 @@ function App(){
   async function submitMember(e){
     e.preventDefault();
     if(!form.full_name.trim()){setNotice('Enter the member name.');return;}
+    if(!editing&&!form.email.trim()){setNotice('A member email is required to create their individual login.');return;}
     if(form.patrol_id&&data.patrols.find(p=>p.id===form.patrol_id)){
       const patrol=data.patrols.find(p=>p.id===form.patrol_id);
       const occupied=data.members.filter(m=>m.patrol_id===form.patrol_id&&m.id!==editing?.id).length;
@@ -315,7 +319,9 @@ function App(){
   async function addPatrol(){
     const name=window.prompt('Enter patrol name (Panther, Eagle, Fox, Tiger, Lion):');if(!name)return;
     if(data.patrols.some(p=>p.name.toLowerCase()===name.trim().toLowerCase())){setNotice('A patrol with this name already exists.');return;}
-    await saveRow('patrols',{id:uid(),name:name.trim(),unit:'Scout',assistant_leader:'',capacity:8});
+    const unit=data.units.find(u=>u.id===user?.profile?.unit_id)||data.units.find(u=>u.category==='Scout');
+    if(!unit){setNotice('Create or select a Scout / Guide unit before adding a patrol.');return;}
+    await saveRow('patrols',{id:uid(),name:name.trim(),unit:unit.category,unit_id:unit.id,assistant_leader:'',capacity:8});
   }
   async function submitEvent(e){e.preventDefault();await saveRow('events',{...eventForm,id:editing?.id||uid(),status:'upcoming'});setModal('');setNotice('Event saved.');}
   async function submitNotice(e){e.preventDefault();await saveRow('notices',{...noticeForm,id:editing?.id||uid()});setModal('');setNotice('Notice published.');}
