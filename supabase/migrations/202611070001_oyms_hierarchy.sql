@@ -234,3 +234,13 @@ using (public.current_role()='super_admin' or (school_id=public.current_school_i
 with check (public.current_role()='super_admin' or (school_id=public.current_school_id() and public.current_role() in ('school_admin','unit_leader')));
 
 -- Never expose Aadhaar numbers as a general member-profile field. Collect Aadhaar only if a lawful school process requires it, in a separately protected workflow.
+
+-- Enforce the single, designated initial Super Admin identity.
+create unique index if not exists profiles_single_super_admin
+  on public.profiles ((role)) where role = 'super_admin';
+
+alter table public.profiles drop constraint if exists profiles_super_admin_email_check;
+alter table public.profiles add constraint profiles_super_admin_email_check
+  check (role <> 'super_admin' or lower(email) = 'kushalkvofmkbsgindiaoyms@gmail.com');
+
+-- Only the designated initial Super Admin can hold the portal-wide role.
