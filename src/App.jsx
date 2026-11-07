@@ -18,16 +18,19 @@ const ROLES = [
   {id:'school_admin',label:'School / Group Admin'},
   {id:'unit_leader',label:'Unit Leader'},
   {id:'patrol_leader',label:'Patrol Leader'},
+  {id:'assistant_patrol_leader',label:'Assistant Patrol Leader'},
   {id:'member',label:'Scout / Guide Member'}
 ];
 const NAV = [
   {id:'dashboard',label:'Dashboard',icon:LayoutDashboard,roles:['all']},
-  {id:'members',label:'Members',icon:Users,roles:['super_admin','school_admin','unit_leader','patrol_leader']},
+  {id:'school-applications',label:'Vidyalaya Applications',icon:GraduationCap,roles:['super_admin']},
+  {id:'accounts',label:'Create Login Accounts',icon:UserPlus,roles:['school_admin','unit_leader']},
+  {id:'members',label:'Members',icon:Users,roles:['super_admin','school_admin','unit_leader','patrol_leader','assistant_patrol_leader']},
   {id:'uid',label:'UID Verification',icon:ShieldCheck,roles:['super_admin','school_admin','unit_leader']},
   {id:'units',label:'Scout & Guide Units',icon:Flag,roles:['super_admin','school_admin','unit_leader']},
-  {id:'patrols',label:'Patrol Management',icon:UsersRound,roles:['super_admin','school_admin','unit_leader','patrol_leader']},
-  {id:'attendance',label:'Attendance',icon:ClipboardCheck,roles:['super_admin','school_admin','unit_leader','patrol_leader']},
-  {id:'tests',label:'Tests & Marks',icon:GraduationCap,roles:['super_admin','school_admin','unit_leader','patrol_leader']},
+  {id:'patrols',label:'Patrol Management',icon:UsersRound,roles:['super_admin','school_admin','unit_leader','patrol_leader','assistant_patrol_leader']},
+  {id:'attendance',label:'Attendance',icon:ClipboardCheck,roles:['super_admin','school_admin','unit_leader','patrol_leader','assistant_patrol_leader']},
+  {id:'tests',label:'Tests & Marks',icon:GraduationCap,roles:['super_admin','school_admin','unit_leader','patrol_leader','assistant_patrol_leader']},
   {id:'progression',label:'Progression Records',icon:Trophy,roles:['super_admin','school_admin','unit_leader']},
   {id:'events',label:'Camps & Activities',icon:Tent,roles:['all']},
   {id:'notices',label:'Circulars & Notifications',icon:Megaphone,roles:['all']},
@@ -40,7 +43,7 @@ const NAV = [
   {id:'settings',label:'Settings',icon:Settings,roles:['super_admin','school_admin']}
 ];
 const TABLES = {
-  members:'members', units:'units', patrols:'patrols', attendance_sessions:'attendance_sessions',
+  members:'members', units:'units', patrols:'patrols', school_applications:'school_applications', attendance_sessions:'attendance_sessions',
   attendance_records:'attendance_records', tests:'tests', test_results:'test_results',
   progression_records:'progression_records', events:'events', notices:'notices',
   certificates:'certificates', logbook_entries:'logbook_entries', registration_requests:'registration_requests'
@@ -63,7 +66,7 @@ const DEMO = {
   notices:[{id:'n1',title:'Unit Meeting — Important Information',body:'All approved Scouts and Guides are requested to report in proper uniform.',published_on:'2026-11-07',audience:'All',is_published:true}],
   certificates:[],logbook_entries:[],registration_requests:[]
 };
-const emptyForm = {full_name:'',category:'Scout',parents_names:'',dob:'',address:'',pin_code:'',email:'',mobile:'',joining_date:'',bsg_uid:'',unit:'Scout',patrol_id:'',verification_status:'pending',status:'active'};
+const emptyForm = {full_name:'',category:'Scout',father_name:'',mother_name:'',parents_names:'',dob:'',address:'',pin_code:'',unit_address:'',email:'',mobile:'',joining_date:'',investiture_date:'',leaving_date:'',troop_company:'',role_in_unit:'Member',bsg_uid:'',unit:'Scout',unit_id:'',patrol_id:'',verification_status:'pending',status:'active'};
 const envUrl = import.meta.env.VITE_SUPABASE_URL;
 const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = envUrl && envKey ? createClient(envUrl,envKey) : null;
@@ -100,6 +103,13 @@ function App(){
   const [editing,setEditing]=useState(null);
   const [form,setForm]=useState(emptyForm);
   const [login,setLogin]=useState({email:'',password:''});
+  const [loginRole,setLoginRole]=useState('school_admin');
+  const [loginOtp,setLoginOtp]=useState('');
+  const [loginOtpSent,setLoginOtpSent]=useState(false);
+  const [schoolForm,setSchoolForm]=useState({school_name:'',affiliation_number:'',division:'KVS Hyderabad Division',school_address:'',principal_name:'',contact_person:'',email:'',mobile:''});
+  const [schoolOtp,setSchoolOtp]=useState('');
+  const [schoolOtpSent,setSchoolOtpSent]=useState(false);
+  const [accountForm,setAccountForm]=useState({full_name:'',email:'',role:'unit_leader',unit_id:'',patrol_id:''});
   const [recoveryMode,setRecoveryMode]=useState(false);
   const [newPassword,setNewPassword]=useState('');
   const [mobileNav,setMobileNav]=useState(false);
@@ -114,7 +124,7 @@ function App(){
   const [certForm,setCertForm]=useState({recipient_name:'',certificate_type:'Participation',certificate_number:'',issue_date:today(),remarks:''});
   const [memberFilter,setMemberFilter]=useState('all');
   const isStaff=['super_admin','school_admin','unit_leader'].includes(role);
-  const canManage=['super_admin','school_admin','unit_leader'].includes(role);
+  const canManage=['super_admin','school_admin','unit_leader','patrol_leader','assistant_patrol_leader'].includes(role);
   const visibleNav=NAV.filter(n=>n.roles.includes('all')||n.roles.includes(role));
   const counts=useMemo(()=>({
     members:data.members.length,
@@ -141,7 +151,12 @@ function App(){
   },[]);
   async function loadProfile(authUser){
     const {data:p,error}=await supabase.from('profiles').select('*').eq('id',authUser.id).single();
-    if(error||!p){setNotice('Your account is signed in, but no authorised OYMS profile exists. Contact the portal administrator.');await supabase.auth.signOut();return;}
+    if(error||!p){
+      const {data:application}=await supabase.from('school_applications').select('status').eq('applicant_user_id',authUser.id).maybeSingle();
+      setNotice(application?.status==='pending'?'Your email is verified. The Super Admin must approve your Vidyalaya registration before School Admin access is activated.':'Your email is verified, but no OYMS role has been assigned. Contact the portal administrator.');
+      await supabase.auth.signOut();setUser(null);setPage('home');return;
+    }
+    if(loginRole&&loginMode&&p.role!==loginRole){setNotice('This account is registered as '+labelRole(p.role)+'. Please select the matching login type.');await supabase.auth.signOut();return;}
     setUser({...authUser,profile:p});setRole(p.role);setDemoMode(false);setLoginMode(false);setPage('dashboard');
     await loadRemoteData();
   }
@@ -178,10 +193,42 @@ function App(){
     setLoading(false);if(error)setNotice(error.message);
   }
   async function sendOtp(){
-    if(!supabase||!login.email){setNotice('Enter your email address first.');return;}
+    if(!supabase||!login.email){setNotice('Enter your registered email address first.');return;}
     setLoading(true);
-    const {error}=await supabase.auth.signInWithOtp({email:login.email,options:{emailRedirectTo:window.location.origin+window.location.pathname}});
-    setLoading(false);setNotice(error?error.message:'A sign-in link / OTP has been sent to your email, if the address is registered.');
+    const {error}=await supabase.auth.signInWithOtp({email:login.email,options:{shouldCreateUser:false}});
+    setLoading(false);if(error){setNotice(error.message);return;}setLoginOtpSent(true);setNotice('A one-time login code has been sent to your registered email.');
+  }
+  async function verifyLoginOtp(e){
+    e.preventDefault();if(!supabase||!login.email||!loginOtp.trim()){setNotice('Enter the email OTP.');return;}
+    setLoading(true);const {error}=await supabase.auth.verifyOtp({email:login.email,token:loginOtp.trim(),type:'email'});setLoading(false);if(error)setNotice(error.message);
+  }
+  async function sendSchoolOtp(e){
+    e.preventDefault();if(!supabase){setNotice('Vidyalaya registration requires the configured email OTP backend.');return;}
+    if(!schoolForm.school_name.trim()||!schoolForm.contact_person.trim()||!schoolForm.email.trim()||!schoolForm.school_address.trim()){setNotice('Complete the Vidyalaya name, authorised contact, email and address.');return;}
+    setLoading(true);const {error}=await supabase.auth.signInWithOtp({email:schoolForm.email.trim().toLowerCase(),options:{shouldCreateUser:true,data:{full_name:schoolForm.contact_person,registration_type:'vidyalaya_application'}}});setLoading(false);
+    if(error){setNotice(error.message);return;}setSchoolOtpSent(true);setNotice('OTP sent. Check the registered Vidyalaya email and enter the code to verify it.');
+  }
+  async function verifySchoolOtp(e){
+    e.preventDefault();if(!supabase||!schoolOtp.trim())return;
+    setLoading(true);const {data:verified,error}=await supabase.auth.verifyOtp({email:schoolForm.email.trim().toLowerCase(),token:schoolOtp.trim(),type:'email'});
+    if(error||!verified.user){setLoading(false);setNotice(error?.message||'Email verification failed.');return;}
+    const application={...schoolForm,applicant_user_id:verified.user.id,email:schoolForm.email.trim().toLowerCase(),email_verified:true,status:'pending'};
+    const {error:insertError}=await supabase.from('school_applications').insert(application);
+    setLoading(false);
+    if(insertError){setNotice(insertError.message);return;}
+    await supabase.auth.signOut();setSchoolOtpSent(false);setSchoolOtp('');setSchoolForm({school_name:'',affiliation_number:'',division:'KVS Hyderabad Division',school_address:'',principal_name:'',contact_person:'',email:'',mobile:''});setPage('home');setNotice('Vidyalaya email verified. Your registration is now pending Super Admin approval. School Admin access will be activated only after approval.');
+  }
+  async function createRoleAccount(e){
+    e.preventDefault();if(!supabase||demoMode){setNotice('Connect the production Supabase backend to create real login accounts.');return;}
+    setLoading(true);const {data:result,error}=await supabase.functions.invoke('create-role-account',{body:accountForm});setLoading(false);
+    if(error||result?.error){setNotice(result?.error||error.message);return;}
+    setNotice(result.message||'Account invitation sent.');setAccountForm({full_name:'',email:'',role:role==='school_admin'?'unit_leader':'patrol_leader',unit_id:user?.profile?.unit_id||'',patrol_id:user?.profile?.patrol_id||''});await loadRemoteData();
+  }
+  async function reviewSchoolApplication(application,decision){
+    if(!supabase||role!=='super_admin'){setNotice('Only the Super Admin can review Vidyalaya registrations.');return;}
+    const notes=decision==='reject'?(window.prompt('Reason for rejection (optional):')||''):'';
+    setLoading(true);const {data:result,error}=await supabase.functions.invoke('approve-school',{body:{application_id:application.id,decision,review_notes:notes}});setLoading(false);
+    if(error||result?.error){setNotice(result?.error||error.message);return;}setNotice(result.message);await loadRemoteData();
   }
   async function recoverPassword(){
     if(!supabase||!login.email){setNotice('Enter your account email first.');return;}
@@ -207,7 +254,7 @@ function App(){
   }
   function openCreate(type,row=null){
     setEditing(row);setModal(type);
-    if(type==='member')setForm(row?{...emptyForm,...row}:{...emptyForm});
+    if(type==='member')setForm(row?{...emptyForm,...row}:{...emptyForm,unit_id:user?.profile?.unit_id||'',patrol_id:role==='patrol_leader'||role==='assistant_patrol_leader'?user?.profile?.patrol_id||'':''});
     if(type==='event')setEventForm(row?{...row}:{title:'',event_type:'Activity',event_date:today(),venue:'',description:''});
     if(type==='notice')setNoticeForm(row?{...row}:{title:'',body:'',published_on:today(),audience:'All',is_published:true});
     if(type==='test')setTestForm(row?{...row}:{title:'',stage:'Pravesh',test_date:today(),max_marks:100,unit:'All'});
@@ -221,8 +268,14 @@ function App(){
       const occupied=data.members.filter(m=>m.patrol_id===form.patrol_id&&m.id!==editing?.id).length;
       if(occupied>=Math.min(8,Number(patrol.capacity||8))){setNotice('This patrol is full. Maximum capacity is eight members.');return;}
     }
-    const row={...form,id:editing?.id||uid(),bsg_uid:String(form.bsg_uid||'').trim()||null,patrol_id:form.patrol_id||null};
-    await saveRow('members',row);setModal('');setNotice(editing?'Member updated.':'Member record saved.');
+    const row={...form,id:editing?.id||uid(),bsg_uid:String(form.bsg_uid||'').trim()||null,patrol_id:form.patrol_id||null,unit_id:form.unit_id||user?.profile?.unit_id||null};
+    if(!editing&&supabase&&!demoMode){
+      if(!form.email.trim()){setNotice('A member email is required to create their individual login.');return;}
+      setLoading(true);const {data:result,error}=await supabase.functions.invoke('create-role-account',{body:{role:'member',full_name:form.full_name,email:form.email,unit_id:row.unit_id,patrol_id:row.patrol_id,member:row}});setLoading(false);
+      if(error||result?.error){setNotice(result?.error||error.message);return;}
+      await loadRemoteData();setModal('');setNotice(result.message||'Member record created and login invitation sent by email.');return;
+    }
+    const saved=await saveRow('members',row);if(!saved)return;setModal('');setNotice(editing?'Member updated.':'Demo member record saved.');
   }
   async function verifyMember(m,status){
     if(status==='approved'&&!String(m.bsg_uid||'').trim()){setNotice('A BSG UID is required before approval.');return;}
@@ -238,15 +291,7 @@ function App(){
     await saveRow('registration_requests',{...r,status});
     setNotice(status==='approved'?'Registration approved and a pending member record was created. Add the BSG UID and verify it separately.':'Registration request rejected.');
   }
-  async function submitRegistration(e){
-    e.preventDefault();
-    const formElement=e.currentTarget;
-    const fd=new FormData(formElement);
-    const row={full_name:fd.get('full_name'),category:fd.get('category'),parents_names:fd.get('parents_names'),dob:fd.get('dob')||null,mobile:fd.get('mobile'),email:fd.get('email'),address:fd.get('address'),status:'pending'};
-    if(supabase&&!demoMode){const {error}=await supabase.from('registration_requests').insert(row);if(error){setNotice(error.message);return;}}
-    else setData(prev=>({...prev,registration_requests:[{...row,id:uid()},...prev.registration_requests]}));
-    formElement.reset();setNotice('Registration request submitted for unit verification.');
-  }
+
   async function submitAttendance(){
     if(!selectedSession){setNotice('Select an attendance session.');return;}
     const sessionRecords=data.members.filter(m=>m.verification_status==='approved').map(m=>({session_id:selectedSession,member_id:m.id,status:attendance[m.id]||'absent'}));
@@ -307,9 +352,9 @@ function App(){
   function Modal(){if(!modal)return null;return <div className="modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setModal('');}}><div className="modal"><div className="modal-head"><div><span className="eyebrow">OYMS RECORD</span><h2>{modal==='member'?(editing?'Edit Member':'Add Member'):modal==='event'?'Activity Details':modal==='notice'?'Circular / Notice':modal==='test'?'Create Test':'Certificate Details'}</h2></div><button className="icon-btn" onClick={()=>setModal('')}><X/></button></div>{modal==='member'&&<form onSubmit={submitMember} className="form-grid"><label>Full name *<input required value={form.full_name} onChange={e=>setForm({...form,full_name:e.target.value})}/></label><label>Category<select value={form.category} onChange={e=>setForm({...form,category:e.target.value,unit:e.target.value})}>{['Scout','Guide','Rover','Ranger'].map(x=><option>{x}</option>)}</select></label><label>Parents' names<input value={form.parents_names} onChange={e=>setForm({...form,parents_names:e.target.value})}/></label><label>Date of birth<input type="date" value={form.dob||''} onChange={e=>setForm({...form,dob:e.target.value})}/></label><label>Mobile<input value={form.mobile} onChange={e=>setForm({...form,mobile:e.target.value})}/></label><label>Email<input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label><label>Joining date<input type="date" value={form.joining_date||''} onChange={e=>setForm({...form,joining_date:e.target.value})}/></label><label>BSG UID<input value={form.bsg_uid||''} onChange={e=>setForm({...form,bsg_uid:e.target.value})}/></label><label>Unit<select value={form.unit} onChange={e=>setForm({...form,unit:e.target.value})}><option>Scout</option><option>Guide</option><option>Rover</option><option>Ranger</option></select></label><label>Patrol<select value={form.patrol_id||''} onChange={e=>setForm({...form,patrol_id:e.target.value})}><option value="">Unassigned</option>{data.patrols.map(p=><option value={p.id}>{p.name} ({p.unit})</option>)}</select></label><label>PIN code<input value={form.pin_code||''} onChange={e=>setForm({...form,pin_code:e.target.value})}/></label><label className="span-2">Home address<textarea value={form.address||''} onChange={e=>setForm({...form,address:e.target.value})}/></label><div className="form-actions span-2"><button type="button" className="outline-btn" onClick={()=>setModal('')}>Cancel</button><button className="primary-btn">Save Member</button></div></form>}{modal==='event'&&<form onSubmit={submitEvent} className="form-grid"><label>Activity title *<input required value={eventForm.title} onChange={e=>setEventForm({...eventForm,title:e.target.value})}/></label><label>Type<select value={eventForm.event_type} onChange={e=>setEventForm({...eventForm,event_type:e.target.value})}>{['Activity','Meeting','Camp','Testing Camp','Service Project','Workshop'].map(x=><option>{x}</option>)}</select></label><label>Date<input type="date" value={eventForm.event_date||''} onChange={e=>setEventForm({...eventForm,event_date:e.target.value})}/></label><label>Venue<input value={eventForm.venue} onChange={e=>setEventForm({...eventForm,venue:e.target.value})}/></label><label className="span-2">Description<textarea value={eventForm.description} onChange={e=>setEventForm({...eventForm,description:e.target.value})}/></label><div className="form-actions span-2"><button type="button" className="outline-btn" onClick={()=>setModal('')}>Cancel</button><button className="primary-btn">Save Activity</button></div></form>}{modal==='notice'&&<form onSubmit={submitNotice} className="form-grid"><label>Title *<input required value={noticeForm.title} onChange={e=>setNoticeForm({...noticeForm,title:e.target.value})}/></label><label>Audience<select value={noticeForm.audience} onChange={e=>setNoticeForm({...noticeForm,audience:e.target.value})}><option>All</option><option>Scouts</option><option>Guides</option><option>Leaders</option></select></label><label className="span-2">Message<textarea required value={noticeForm.body} onChange={e=>setNoticeForm({...noticeForm,body:e.target.value})}/></label><div className="form-actions span-2"><button type="button" className="outline-btn" onClick={()=>setModal('')}>Cancel</button><button className="primary-btn">Publish Notice</button></div></form>}{modal==='test'&&<form onSubmit={submitTest} className="form-grid"><label>Test title *<input required value={testForm.title} onChange={e=>setTestForm({...testForm,title:e.target.value})}/></label><label>Stage<select value={testForm.stage} onChange={e=>setTestForm({...testForm,stage:e.target.value})}>{STAGES.map(x=><option>{x}</option>)}</select></label><label>Date<input type="date" value={testForm.test_date||''} onChange={e=>setTestForm({...testForm,test_date:e.target.value})}/></label><label>Maximum marks<input type="number" min="1" value={testForm.max_marks} onChange={e=>setTestForm({...testForm,max_marks:e.target.value})}/></label><div className="form-actions span-2"><button type="button" className="outline-btn" onClick={()=>setModal('')}>Cancel</button><button className="primary-btn">Create Test</button></div></form>}{modal==='certificate'&&<form onSubmit={submitCertificate} className="form-grid"><label>Recipient name *<input required value={certForm.recipient_name} onChange={e=>setCertForm({...certForm,recipient_name:e.target.value})}/></label><label>Certificate type<input required value={certForm.certificate_type} onChange={e=>setCertForm({...certForm,certificate_type:e.target.value})}/></label><label>Certificate number<input value={certForm.certificate_number} onChange={e=>setCertForm({...certForm,certificate_number:e.target.value})}/></label><label>Issue date<input type="date" value={certForm.issue_date} onChange={e=>setCertForm({...certForm,issue_date:e.target.value})}/></label><label className="span-2">Remarks<textarea value={certForm.remarks} onChange={e=>setCertForm({...certForm,remarks:e.target.value})}/></label><div className="form-actions span-2"><button type="button" className="outline-btn" onClick={()=>setModal('')}>Cancel</button><button className="primary-btn">Save Certificate</button></div></form>}</div></div>}
   if(recoveryMode)return <div className="login-page"><div className="login-card"><div className="public-logo">BSG</div><span className="eyebrow">ACCOUNT SECURITY</span><h1>Set a new password</h1><p>Choose a new password for your OYMS account.</p><form onSubmit={updatePassword}><label>New password<input type="password" minLength="8" required value={newPassword} onChange={e=>setNewPassword(e.target.value)}/></label><button className="primary-btn block-btn" disabled={loading}>{loading?'Updating…':'Update password'}</button></form></div></div>;
   if(page==='home')return <div className="public-home"><div className="gov-strip"><span>भारत स्काउट्स एवं गाइड्स · BHARAT SCOUTS & GUIDES</span><span>School Unit Portal · KVS Hyderabad Division</span></div><header className="public-head"><div className="public-logo">BSG</div><div><b>भारत स्काउट्स एवं गाइड्स</b><h1>BHARAT SCOUTS & GUIDES</h1><p>{SCHOOL} · {PLACE}</p><small>{DIVISION}</small></div><div className="public-system">OYMS 4.0<small>ONLINE YOUTH MANAGEMENT SYSTEM · 2026</small></div></header><main className="public-main"><section className="public-columns"><div className="public-column"><h2>Unit Highlights</h2><ul><li>Scout and Guide unit activities and patrol programmes</li><li>Pravesh to Rashtrapati progression records</li><li>Dwitiya Sopan Testing Camp and skill development</li><li>Community service, SDG projects and workshops</li><li>Camps, Court of Honour and unit announcements</li></ul><button className="public-button" onClick={()=>setPage('events')}>View Activities</button></div><div className="public-column updates"><h2>Portal Updates</h2><ul><li>Online Scout and Guide registration <em>NEW</em></li><li>BSG UID verification and member approval <em>NEW</em></li><li>Attendance and participation records</li><li>Tests, marks and progression updates</li><li>Certificates, notices and reports</li></ul><button className="public-button" onClick={()=>setPage('notices')}>View All</button></div></section><section className="public-access"><div><b>Access the BSG OYMS Portal</b><small>Sign in with your authorised account or explore the demo.</small></div><button onClick={()=>setLoginMode(true)}>Portal Login <ChevronRight size={16}/></button><button className="secondary" onClick={()=>setPage('register')}>New Member Registration</button></section><section className="public-services"><h2>Integrated Portal Services</h2><div>{['Member Database','UID Verification','Scout & Guide Units','Patrol Management','Attendance','Tests & Marks','Progression Records','Camps & Activities','Certificates','Reports & Analytics'].map(x=><article><ShieldCheck/><b>{x}</b></article>)}</div></section></main><footer className="public-footer">{SCHOOL} · EDDUMAILARAM · {DIVISION}<br/>Independent school-level Bharat Scouts & Guides Unit Management Portal · 2026</footer></div>;
-  if(page==='register')return <div className="register-page"><button className="back-link" onClick={()=>setPage('home')}><ChevronLeft size={16}/> Back to Home</button><div className="panel register-card"><div className="public-logo">BSG</div><h1>Scout & Guide Registration</h1><p>{SCHOOL} · {DIVISION}</p><form onSubmit={submitRegistration} className="form-grid"><label>Full name *<input name="full_name" required/></label><label>Category<select name="category"><option>Scout</option><option>Guide</option><option>Rover</option><option>Ranger</option></select></label><label>Parents' names<input name="parents_names"/></label><label>Date of birth<input type="date" name="dob"/></label><label>Mobile<input name="mobile" required/></label><label>Email<input type="email" name="email"/></label><label className="span-2">Address<textarea name="address"/></label><div className="span-2 form-actions"><button className="primary-btn">Submit Registration Request</button></div></form><small className="muted">Submission creates a pending request for unit review; it does not automatically create an account or approve a BSG UID.</small></div></div>;
-  if(loginMode)return <div className="login-page"><button className="back-link" onClick={()=>setLoginMode(false)}><ChevronLeft size={16}/> Back to portal</button><div className="login-card"><div className="public-logo">BSG</div><span className="eyebrow">OYMS 4.0 · AUTHORISED ACCESS</span><h1>Welcome back</h1><p>Sign in to the KV Medak BSG Portal</p>{supabase?<form onSubmit={signIn}><label>Email address<input type="email" required value={login.email} onChange={e=>setLogin({...login,email:e.target.value})}/></label><label>Password<input type="password" required value={login.password} onChange={e=>setLogin({...login,password:e.target.value})}/></label><button className="primary-btn block-btn" disabled={loading}>{loading?'Signing in…':'Sign in securely'}</button><div className="login-links"><button type="button" onClick={sendOtp} disabled={loading}>Email OTP / magic link</button><button type="button" onClick={recoverPassword} disabled={loading}>Forgot password?</button></div></form>:<div className="demo-access"><div className="demo-warning"><AlertCircle size={17}/> Backend not configured. These are local demo sessions, not secure accounts.</div>{ROLES.map(r=><button key={r.id} onClick={()=>enterDemo(r.id)}><span>{r.label}</span><ChevronRight size={16}/></button>)}</div>}</div></div>;
-  const pageContent=({dashboard:<Dashboard/>,members:<Members/>,uid:<UID/>,units:<Units/>,patrols:<Patrols/>,attendance:<Attendance/>,tests:<Tests/>,progression:<Progression/>,events:<Events/>,notices:<Notices/>,court:<Court/>,logbooks:<Logbooks/>,certificates:<Certificates/>,reports:<Reports/>,profile:<Profile/>,settings:<SettingsPage/>,gallery:<Gallery/>})[page]||<Dashboard/>;
+  if(page==='register')return <div className="register-page"><button className="back-link" onClick={()=>{setPage('home');setSchoolOtpSent(false);}}><ChevronLeft size={16}/> Back to Home</button><div className="panel register-card"><div className="public-logo">OYMS</div><span className="eyebrow">VIDYALAYA ONBOARDING · EMAIL VERIFICATION REQUIRED</span><h1>Register Your Vidyalaya</h1><p>Submit your school details. A one-time password will be sent to the official email address. No Admin login is issued until the Super Admin approves the verified application.</p>{!schoolOtpSent?<form onSubmit={sendSchoolOtp} className="form-grid"><label>Vidyalaya name *<input required value={schoolForm.school_name} onChange={e=>setSchoolForm({...schoolForm,school_name:e.target.value})}/></label><label>KVS Division *<input required value={schoolForm.division} onChange={e=>setSchoolForm({...schoolForm,division:e.target.value})}/></label><label>Affiliation / KV code<input value={schoolForm.affiliation_number} onChange={e=>setSchoolForm({...schoolForm,affiliation_number:e.target.value})}/></label><label>Principal name<input value={schoolForm.principal_name} onChange={e=>setSchoolForm({...schoolForm,principal_name:e.target.value})}/></label><label>Authorised contact person *<input required value={schoolForm.contact_person} onChange={e=>setSchoolForm({...schoolForm,contact_person:e.target.value})}/></label><label>Official email for OTP *<input type="email" required value={schoolForm.email} onChange={e=>setSchoolForm({...schoolForm,email:e.target.value})}/></label><label>Contact mobile<input type="tel" value={schoolForm.mobile} onChange={e=>setSchoolForm({...schoolForm,mobile:e.target.value})}/></label><label className="span-2">Complete Vidyalaya address *<textarea required value={schoolForm.school_address} onChange={e=>setSchoolForm({...schoolForm,school_address:e.target.value})}/></label><div className="span-2 form-actions"><button className="primary-btn" disabled={loading}>{loading?'Sending OTP…':'Send Email OTP'}</button></div></form>:<form onSubmit={verifySchoolOtp} className="form-grid"><div className="span-2 demo-warning"><ShieldCheck size={17}/> OTP sent to {schoolForm.email}. Verify this email before the application is submitted.</div><label className="span-2">6-digit email OTP<input required inputMode="numeric" maxLength="8" autoComplete="one-time-code" value={schoolOtp} onChange={e=>setSchoolOtp(e.target.value)}/></label><div className="span-2 form-actions"><button type="button" className="outline-btn" onClick={()=>setSchoolOtpSent(false)}>Edit details</button><button className="primary-btn" disabled={loading}>{loading?'Verifying…':'Verify Email & Submit Application'}</button></div></form>}<small className="muted">After OTP verification, the Super Admin reviews the Vidyalaya. Only an approved Vidyalaya receives School / Group Admin access. That Admin can then create Unit Leader accounts.</small></div></div>;
+  if(loginMode)return <div className="login-page"><button className="back-link" onClick={()=>setLoginMode(false)}><ChevronLeft size={16}/> Back to portal</button><div className="login-card"><div className="public-logo">BSG</div><span className="eyebrow">OYMS 4.0 · SECURE ROLE-BASED ACCESS</span><h1>{labelRole(loginRole)} Login</h1><p>Select your authorised account level. Your actual permissions are determined by the role approved by the Super Admin / School Admin.</p><label>Login portal<select value={loginRole} onChange={e=>{setLoginRole(e.target.value);setLoginOtpSent(false);}}>{ROLES.map(r=><option key={r.id} value={r.id}>{r.label} Login</option>)}</select></label>{supabase?<><form onSubmit={signIn}><label>Registered email<input type="email" required value={login.email} onChange={e=>setLogin({...login,email:e.target.value})}/></label><label>Password<input type="password" value={login.password} onChange={e=>setLogin({...login,password:e.target.value})} placeholder="Use password or request email OTP"/></label><button className="primary-btn block-btn" disabled={loading}>{loading?'Signing in…':'Sign in'}</button></form><div className="login-links"><button type="button" onClick={sendOtp} disabled={loading}>Send email OTP</button><button type="button" onClick={recoverPassword} disabled={loading}>Forgot password?</button></div>{loginOtpSent&&<form onSubmit={verifyLoginOtp} className="otp-login-form"><label>Email OTP<input required inputMode="numeric" autoComplete="one-time-code" value={loginOtp} onChange={e=>setLoginOtp(e.target.value)}/></label><button className="primary-btn block-btn" disabled={loading}>{loading?'Verifying…':'Verify OTP & Login'}</button></form>}</>:<div className="demo-warning"><AlertCircle size={17}/> Live login is not enabled yet. Configure Supabase Auth, database migrations and Edge Function secrets. Demo role-switching is disabled so nobody can bypass the approval hierarchy.</div>}</div></div>;
+    const pageContent=({dashboard:<Dashboard/>,school-applications:<SchoolApplications/>,accounts:<Accounts/>,members:<Members/>,uid:<UID/>,units:<Units/>,patrols:<Patrols/>,attendance:<Attendance/>,tests:<Tests/>,progression:<Progression/>,events:<Events/>,notices:<Notices/>,court:<Court/>,logbooks:<Logbooks/>,certificates:<Certificates/>,reports:<Reports/>,profile:<Profile/>,settings:<SettingsPage/>,gallery:<Gallery/>})[page]||<Dashboard/>;
   return <div className="app-shell"><Sidebar/><div className="main-area"><Topbar/><main className="page-content">{notice&&<div className="toast"><CheckCircle2 size={17}/>{notice}<button onClick={()=>setNotice('')}><X size={15}/></button></div>}{pageContent}</main><footer className="app-footer">{SCHOOL} · {PLACE} · {DIVISION}<span>BSG OYMS 4.0 · 2026</span></footer></div><Modal/></div>;
 }
 export default App;
