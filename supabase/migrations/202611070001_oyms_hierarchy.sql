@@ -45,8 +45,12 @@ alter table public.profiles drop constraint if exists profiles_role_check;
 alter table public.profiles add constraint profiles_role_check check (role in ('super_admin','school_admin','unit_leader','patrol_leader','assistant_patrol_leader','member'));
 
 alter table public.units add column if not exists school_id uuid references public.schools(id) on delete cascade;
+alter table public.units drop constraint if exists units_name_key;
+create unique index if not exists units_school_name_unique on public.units(school_id,name) where school_id is not null;
 alter table public.units add column if not exists leader_id uuid references public.profiles(id) on delete set null;
 alter table public.patrols add column if not exists school_id uuid references public.schools(id) on delete cascade;
+alter table public.patrols drop constraint if exists patrols_name_unit_key;
+create unique index if not exists patrols_school_name_unit_unique on public.patrols(school_id,name,unit) where school_id is not null;
 alter table public.patrols add column if not exists unit_id uuid references public.units(id) on delete cascade;
 alter table public.patrols add column if not exists assistant_leader_id uuid references public.profiles(id) on delete set null;
 
@@ -179,7 +183,8 @@ using (public.can_manage_unit(unit_id)) with check (public.can_manage_unit(unit_
 create policy "members scoped read" on public.members for select to authenticated
 using (
   public.current_role()='super_admin'
-  or (school_id=public.current_school_id() and public.current_role() in ('school_admin','unit_leader'))
+  or (school_id=public.current_school_id() and public.current_role()='school_admin')
+  or (school_id=public.current_school_id() and public.current_role()='unit_leader' and unit_id=public.current_unit_id())
   or (public.current_role() in ('patrol_leader','assistant_patrol_leader') and patrol_id=public.current_patrol_id())
   or exists(select 1 from public.profiles p where p.id=auth.uid() and p.role='member' and p.member_id=members.id)
 );
