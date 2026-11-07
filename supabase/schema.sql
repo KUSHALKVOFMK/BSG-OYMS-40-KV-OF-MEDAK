@@ -184,8 +184,7 @@ alter table public.registration_requests enable row level security;
 
 create policy "profiles read own or staff" on public.profiles for select to authenticated
 using (id = auth.uid() or public.is_staff());
-create policy "profiles staff update" on public.profiles for update to authenticated
-using (public.current_role() in ('super_admin','school_admin')) with check (public.current_role() in ('super_admin','school_admin'));
+-- Role changes are deliberately not exposed to browser clients. Manage roles via the trusted Supabase SQL editor or a secured server-side admin function.
 
 create policy "units readable by authenticated" on public.units for select to authenticated using (true);
 create policy "units staff manage" on public.units for all to authenticated using (public.is_staff()) with check (public.is_staff());
