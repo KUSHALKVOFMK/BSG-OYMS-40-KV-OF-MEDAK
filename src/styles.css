@@ -133,3 +133,16 @@
 .panel{border-radius:2px}
 .primary-btn{border-radius:2px}
 @media(max-width:760px){.main-area{margin-left:0}.public-main{padding:14px}.login-card-body{padding:22px 18px}.public-head{border-bottom-width:3px}}
+
+.public-listing-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:8px 0 22px}
+.public-listing-head h2{color:#293b91;margin:5px 0;font-size:25px;font-weight:500}
+.public-listing-head p{color:#687386;margin:0;font-size:13px}
+.public-record-list{display:grid;gap:13px}
+.public-record-card{display:flex;gap:16px;align-items:flex-start;padding:20px;background:#fff;border:1px solid #dedee3;border-left:4px solid #9674b6;border-radius:2px}
+.public-record-card h3{margin:5px 0;color:#293b91;font-size:17px}
+.public-record-card p{margin:6px 0;color:#4b5563;white-space:pre-wrap;line-height:1.6}
+.public-record-card small{color:#687386}
+.public-empty{text-align:center;padding:42px 20px;color:#687386}
+.public-empty svg{width:30px;height:30px;color:#9674b6}
+.public-empty h3{color:#293b91}
+@media(max-width:650px){.public-listing-head{align-items:flex-start;flex-direction:column}.public-record-card{padding:15px;gap:10px}}
