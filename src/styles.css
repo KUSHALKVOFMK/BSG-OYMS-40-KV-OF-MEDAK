@@ -63,3 +63,73 @@
 .public-slider-note{margin:auto 16px 20px;padding:12px;border-left:3px solid #9875b8;color:#606779;font-size:12px;line-height:1.5}
 @keyframes oymsSlideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
 @media(max-width:700px){.public-head{gap:12px;flex-wrap:wrap}.public-menu-toggle{order:-1}.public-system{width:100%}}
+
+
+/* OYMS 4.0 full interface refinement based on the BSG portal reference */
+:root{--purple:#9674b6;--purple-dark:#765496;--oyms-navy:#293b91;--oyms-text:#34445b;--oyms-grey:#ededee}
+.public-home{background:#f4f4f5}
+.gov-strip{background:#765496;color:#fff}
+.public-head{background:#9674b6;color:#fff;border-bottom:4px solid #e2c77e}
+.public-head h1,.public-head b,.public-head p,.public-head small{color:#fff}
+.public-logo{background:#fff;color:#765496;border:2px solid #e2c77e}
+.public-system{color:#fff}
+.public-system small{color:#f4eefa}
+.public-menu-toggle{background:#765496;border-radius:2px;min-height:44px}
+.public-main{max-width:1280px;margin:0 auto;padding:24px}
+.public-columns{gap:18px}
+.public-column{background:#fff;border:1px solid #ddd;border-top:4px solid #293b91;border-radius:2px;box-shadow:0 2px 8px #0000000c}
+.public-column h2{color:#293b91}
+.public-column li{line-height:1.65}
+.public-button{background:#293b91;border-radius:2px}
+.public-access{background:#fff;border:1px solid #ddd;border-left:5px solid #9674b6;border-radius:2px}
+.public-access button{border-radius:2px;background:#293b91}
+.public-access button.secondary{background:#fff;color:#293b91;border:1px solid #293b91}
+.public-services{padding:26px 0}
+.public-services h2{color:#293b91}
+.public-services-intro{color:#6b7280;font-size:13px;margin:-7px 0 18px}
+.public-services article{background:#fff;border:1px solid #dedee3;border-radius:2px;min-height:78px;color:#34445b}
+.public-services article svg{color:#9674b6}
+.public-footer{background:#e9e9eb;color:#5e6472}
+.public-slider{border-radius:0}
+.public-slider-head{background:#9674b6}
+.public-slider>button{min-height:48px;border-radius:0}
+.public-slider>button.portal-login-link{background:#293b91}
+.oyms-side-nav{padding:0 0 12px!important}
+.side-nav-group{border-bottom:1px solid #d9d9dc}
+.side-group-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;padding:13px 14px;background:#ededee;border:0;color:#34445b;text-align:left;font-size:12px;cursor:pointer}
+.side-group-toggle:hover,.side-group-toggle.expanded{background:#e5e0e9;color:#35276f}
+.side-group-toggle svg{transition:transform .18s}
+.side-group-toggle.expanded svg{transform:rotate(180deg)}
+.side-group-items{background:#f5f5f6}
+.side-group-items button{padding-left:27px!important;background:#f5f5f6!important;border-bottom:1px solid #e7e7e9!important}
+.side-group-items button.active{background:#e4dceb!important;color:#35276f!important;box-shadow:inset 3px 0 #9674b6}
+.sidebar nav>button{width:100%}
+.oyms-login-card{padding:0;overflow:hidden;border-radius:3px;max-width:470px}
+.login-brand-band{display:flex;align-items:center;gap:13px;padding:18px 24px;background:#9674b6;color:#fff}
+.login-brand-band .public-logo{margin:0;width:52px;height:52px;flex:none}
+.login-brand-band b,.login-brand-band small{display:block;color:#fff}
+.login-brand-band b{font-size:13px;letter-spacing:.3px}
+.login-brand-band small{font-size:9px;margin-top:4px;opacity:.9}
+.login-card-body{padding:26px 30px}
+.login-card-body h1{font-weight:500;color:#293b91;margin:7px 0}
+.login-card-body>p{line-height:1.6}
+.login-card-body>label{margin:13px 0}
+.login-card-body input,.login-card-body select{min-height:44px;border-radius:2px}
+.login-card-body .primary-btn{min-height:46px;border-radius:2px;letter-spacing:.4px}
+.login-security-note{display:flex;gap:8px;align-items:center;border-top:1px solid #e7e7e9;padding-top:13px;margin-top:18px;color:#697386;font-size:10px}
+.login-footer{color:#737887;font-size:10px;text-align:center;margin-top:15px}
+.login-page{background:#f0eef2}
+.login-page .back-link{color:#293b91}
+.sidebar{width:235px}
+.side-brand{background:#9674b6;min-height:55px}
+.side-brand b{font-size:11px;line-height:1.35}
+.side-brand small{font-size:9px}
+.side-institution{font-size:9px;line-height:1.7}
+.main-area{margin-left:235px}
+.topbar{background:#9674b6}
+.welcome-banner{border-top:4px solid #293b91}
+.welcome-banner h2{font-size:26px;font-weight:300;letter-spacing:.8px;text-transform:uppercase}
+.stat-card{border-radius:2px}
+.panel{border-radius:2px}
+.primary-btn{border-radius:2px}
+@media(max-width:760px){.main-area{margin-left:0}.public-main{padding:14px}.login-card-body{padding:22px 18px}.public-head{border-bottom-width:3px}}
