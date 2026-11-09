@@ -11,3 +11,39 @@
 .login-links{display:flex;justify-content:space-between;gap:10px;margin-top:2px}.login-links button{border:0;background:transparent;color:#514a9a;font-size:10px;font-weight:700;padding:4px 0}.login-links button:disabled{opacity:.5}@media(max-width:480px){.login-links{flex-direction:column;align-items:flex-start;gap:3px}}
 
 .login-card>label{display:flex;flex-direction:column;gap:6px;font-size:10px;color:#656982;font-weight:700;margin:12px 0}.login-card>label select,.otp-login-form input{width:100%;border:1px solid #dfe1eb;border-radius:6px;padding:10px;font-size:11px;color:#343750;background:#fff}.otp-login-form{display:grid;gap:10px;margin-top:13px;padding-top:13px;border-top:1px solid #eff0f5}.otp-login-form label{display:flex;flex-direction:column;gap:6px;font-size:10px;color:#656982;font-weight:700}
+
+
+/* OYMS reference refresh: BSG-style purple header and light navigation */
+:root{--purple:#8f6bb2;--deep:#35276f;--blue:#293b91;--gold:#b58b3d;--line:#dedee3;--surface:#fff}
+.sidebar{background:#ededee;color:#344054;width:235px;box-shadow:1px 0 4px #00000012}
+.side-brand{background:#9875b8;color:#fff;padding:10px 14px;min-height:54px}
+.side-brand b{color:#fff;font-size:12px}
+.side-brand small,.side-institution{color:#f5eff9}
+.side-institution{background:#9875b8;border-color:#ffffff25;padding:0 14px 10px}
+.brand-seal{background:#fff;color:#6b438b;border-color:#e8d5a8}
+.sidebar nav{padding:0; background:#ededee}
+.sidebar nav button{color:#34445b;border-radius:0;border-bottom:1px solid #d9d9dc;padding:13px 14px;margin:0;font-size:12px}
+.sidebar nav button:hover,.sidebar nav button.active{background:#e2d9eb;color:#35276f}
+.sidebar nav button.active{box-shadow:inset 3px 0 #8f6bb2;font-weight:700}
+.side-bottom{background:#e7e7e9;border-top:1px solid #d5d5d8}
+.user-mini b{color:#354052}.user-mini small{color:#687386}
+.logout-btn{background:#9875b8;color:#fff}
+.main-area{margin-left:235px}
+.topbar{height:46px;background:#9875b8;color:#fff;border:0;padding:0 20px;box-shadow:0 1px 3px #0002}
+.crumb{color:#f1e9f7}.crumb b,.topbar h1{color:#fff}
+.topbar h1{font-size:16px}
+.icon-btn{background:transparent;border-color:#ffffff55;color:#fff}
+.mode-pill.demo{background:#fff2d5;color:#805d18}.mode-pill.live{background:#e4f7ed;color:#176c43}
+.page-content{padding:24px 30px;background:#f5f5f6}
+.welcome-banner{border-radius:0;background:#fff;color:#30354a;border:1px solid #dedee3;padding:26px 30px;box-shadow:0 3px 12px #00000012}
+.welcome-banner:after{display:none}
+.welcome-banner .eyebrow{color:#8f6bb2}
+.welcome-banner h2{color:#30354a;font-weight:400;letter-spacing:.6px}
+.welcome-banner p{color:#73778b}
+.banner-mark{color:#8f6bb2}
+.panel,.stat-card{border-radius:2px;box-shadow:0 2px 8px #0000000b}
+.section-head h2{color:#293b91}
+.primary-btn{background:#293b91;border-color:#293b91;border-radius:2px}
+.text-btn{color:#087da2}
+.app-footer{background:#f5f5f6}
+@media(max-width:760px){.sidebar{width:260px}.main-area{margin-left:0}.topbar{height:54px;padding:0 12px}.page-content{padding:16px 12px}}
