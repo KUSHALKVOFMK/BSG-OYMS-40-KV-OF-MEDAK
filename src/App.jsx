@@ -152,6 +152,16 @@ function App(){
   },[data]);
   useEffect(()=>{
     if(!supabase)return;
+    let active=true;
+    supabase.from('notices').select('*').eq('is_published',true).order('published_on',{ascending:false}).limit(100).then(({data:rows,error})=>{
+      if(!active||error||!rows)return;
+      const publicRows=rows.filter(isPublicNotice);
+      setData(prev=>({...prev,notices:[...publicRows,...prev.notices.filter(n=>!publicRows.some(r=>r.id===n.id))]}));
+    });
+    return ()=>{active=false;};
+  },[]);
+  useEffect(()=>{
+    if(!supabase)return;
     supabase.auth.getSession().then(async ({data:s})=>{
       if(s.session) await loadProfile(s.session.user);
     });
