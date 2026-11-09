@@ -47,3 +47,19 @@
 .text-btn{color:#087da2}
 .app-footer{background:#f5f5f6}
 @media(max-width:760px){.sidebar{width:260px}.main-area{margin-left:0}.topbar{height:54px;padding:0 12px}.page-content{padding:16px 12px}}
+
+
+/* Public portal slide-out navigation */
+.public-head{position:relative}
+.public-menu-toggle{display:inline-flex;align-items:center;gap:8px;align-self:center;border:1px solid #ffffff70;background:#8f6bb2;color:#fff;padding:10px 13px;border-radius:3px;font-weight:700;cursor:pointer}
+.public-slider-backdrop{position:fixed;inset:0;z-index:1000;background:#11182780;display:flex}
+.public-slider{width:min(330px,86vw);height:100%;background:#f0f0f1;box-shadow:8px 0 28px #0003;display:flex;flex-direction:column;animation:oymsSlideIn .22s ease-out}
+.public-slider-head{display:flex;align-items:center;justify-content:space-between;padding:18px 16px;background:#9875b8;color:#fff;font-size:16px}
+.public-slider-head button{background:transparent;border:0;color:#fff;cursor:pointer}
+.public-slider>button{display:flex;align-items:center;gap:12px;width:100%;padding:15px 17px;text-align:left;border:0;border-bottom:1px solid #d9d9dc;background:#ededee;color:#34445b;cursor:pointer;font-size:14px}
+.public-slider>button:hover{background:#e2d9eb;color:#35276f}
+.public-slider>button.portal-login-link{background:#293b91;color:#fff;font-weight:700}
+.public-slider>button.portal-login-link:hover{background:#202f79}
+.public-slider-note{margin:auto 16px 20px;padding:12px;border-left:3px solid #9875b8;color:#606779;font-size:12px;line-height:1.5}
+@keyframes oymsSlideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+@media(max-width:700px){.public-head{gap:12px;flex-wrap:wrap}.public-menu-toggle{order:-1}.public-system{width:100%}}
