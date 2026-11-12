@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#123d75">
+<title>OYMS Sankalp 4.0 | Sample Portal</title>
+<style>
+:root{--navy:#123d75;--blue:#1769aa;--sky:#eaf4ff;--gold:#f4b942;--ink:#17324d;--muted:#63758b}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:#f3f7fc}
+.top{background:linear-gradient(115deg,#102f60,#1769aa);color:white;padding:17px 5vw;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.brand{display:flex;align-items:center;gap:12px}.mark{width:48px;height:48px;border:2px solid #ffffffb8;border-radius:14px;display:grid;place-items:center;font-weight:800;font-size:15px;letter-spacing:-1px}.brand strong{display:block;font-size:17px;letter-spacing:.3px}.brand small{opacity:.85;font-size:11px}
+.top-tag{font-size:11px;border:1px solid #ffffff70;padding:8px 12px;border-radius:30px;white-space:nowrap}
+.hero{padding:48px 18px 35px;text-align:center;background:radial-gradient(circle at 50% 0,#d9ebff,transparent 65%),#f3f7fc}
+.kicker{color:#1769aa;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+h1{font-size:clamp(30px,5vw,48px);margin:12px 0 10px;color:#123d75}.hero p{max-width:620px;margin:0 auto;color:#5e7188;line-height:1.6;font-size:15px}
+.wrap{max-width:960px;margin:0 auto;padding:10px 18px 55px}
+.section-title{text-align:center;margin:15px 0 22px}.section-title h2{font-size:21px;margin:0 0 7px;color:#173c68}.section-title p{margin:0;color:var(--muted);font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.card{background:white;border:1px solid #dce7f3;border-radius:20px;padding:27px;box-shadow:0 10px 28px #173c6810;transition:.2s}
+.card:hover{transform:translateY(-3px);box-shadow:0 14px 32px #173c6819}
+.symbol{height:54px;width:54px;border-radius:16px;display:grid;place-items:center;font-size:25px;margin-bottom:18px}
+.admin .symbol{background:#e8f1ff;color:#1769aa}.patrol .symbol{background:#e8f7ef;color:#198451}
+.card h3{font-size:20px;margin:0 0 8px}.card p{font-size:13px;line-height:1.55;color:#687b90;min-height:40px;margin:0 0 20px}
+button{border:0;border-radius:10px;padding:13px 17px;width:100%;font-size:14px;font-weight:700;cursor:pointer;background:#1769aa;color:white}
+.patrol button{background:#198451}button:hover{filter:brightness(.94)}
+.login{display:none;margin-top:18px;border-top:1px solid #e7edf4;padding-top:17px}.login.show{display:block}
+.login label{display:block;font-size:12px;font-weight:700;margin:10px 0 6px}.login input{width:100%;padding:12px;border:1px solid #cfdae7;border-radius:9px;font-size:14px}
+.note{font-size:11px!important;min-height:0!important;margin:12px 0 0!important;color:#75869a!important}
+.notice{margin:25px auto 0;background:#fff8e7;border:1px solid #f2dfad;color:#76551b;border-radius:12px;padding:12px 15px;font-size:12px;line-height:1.5;max-width:690px}
+footer{text-align:center;padding:20px;color:#718197;font-size:11px;border-top:1px solid #e2eaf2;background:#fff}
+@media(max-width:640px){.cards{grid-template-columns:1fr}.hero{padding-top:38px}.card{padding:23px}.top{padding:14px 18px}.top-tag{font-size:10px}}
+</style></head>
+<body>
+<header class="top"><div class="brand"><div class="mark">OYMS</div><div><strong>OYMS SANKALP 4.0</strong><small>Online Youth Management System</small></div></div><div class="top-tag">SAMPLE PORTAL</div></header>
+<section class="hero"><div class="kicker">A connected youth network</div><h1>OYMS Sankalp 4.0</h1><p>A simple sample portal for the next phase of the Online Youth Management System. Choose your login category to preview the sign-in screen.</p></section>
+<main class="wrap"><div class="section-title"><h2>Select Login</h2><p>Only the two login categories planned for this sample portal</p></div>
+<div class="cards">
+<section class="card admin"><div class="symbol">♙</div><h3>Administrator Login</h3><p>For the portal administrator to access the administration area.</p><button type="button" onclick="toggleLogin('admin')">Administrator Sign In</button><div class="login" id="admin"><label for="admin-email">Email Address</label><input id="admin-email" type="email" placeholder="Enter administrator email"><label for="admin-pass">Password</label><input id="admin-pass" type="password" placeholder="Enter password"><button style="margin-top:14px" type="button" onclick="demoMessage()">Continue</button><p class="note">Sample screen only — authentication will be connected in the full website.</p></div></section>
+<section class="card patrol"><div class="symbol">♧</div><h3>Patrol Leader Login</h3><p>For registered patrol leaders to access their designated area.</p><button type="button" onclick="toggleLogin('patrol')">Patrol Leader Sign In</button><div class="login" id="patrol"><label for="patrol-id">Email / Login ID</label><input id="patrol-id" type="text" placeholder="Enter your login ID"><label for="patrol-pass">Password</label><input id="patrol-pass" type="password" placeholder="Enter password"><button style="margin-top:14px" type="button" onclick="demoMessage()">Continue</button><p class="note">Sample screen only — authentication will be connected in the full website.</p></div></section>
+</div><div class="notice"><strong>Preview version:</strong> This page demonstrates the portal design and the two login entry points. Login credentials, dashboards, database, and member-data features are not active in this sample.</div></main>
+<footer>OYMS Sankalp 4.0 · Sample Portal · Designed for mobile and desktop</footer>
+<script>
+function toggleLogin(id){document.querySelectorAll('.login').forEach(x=>x.classList.remove('show'));document.getElementById(id).classList.add('show');document.getElementById(id).scrollIntoView({behavior:'smooth',block:'nearest'})}
+function demoMessage(){alert('This is a sample portal. Login will be enabled in the full website.')}
+</script></body></html>
