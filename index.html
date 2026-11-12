@@ -2,44 +2,80 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#123d75">
-<title>OYMS Sankalp 4.0 | Sample Portal</title>
+<meta name="theme-color" content="#123d75"><title>OYMS Sankalp 4.0</title>
 <style>
-:root{--navy:#123d75;--blue:#1769aa;--sky:#eaf4ff;--gold:#f4b942;--ink:#17324d;--muted:#63758b}
-*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:#f3f7fc}
-.top{background:linear-gradient(115deg,#102f60,#1769aa);color:white;padding:17px 5vw;display:flex;align-items:center;justify-content:space-between;gap:15px}
-.brand{display:flex;align-items:center;gap:12px}.mark{width:48px;height:48px;border:2px solid #ffffffb8;border-radius:14px;display:grid;place-items:center;font-weight:800;font-size:15px;letter-spacing:-1px}.brand strong{display:block;font-size:17px;letter-spacing:.3px}.brand small{opacity:.85;font-size:11px}
-.top-tag{font-size:11px;border:1px solid #ffffff70;padding:8px 12px;border-radius:30px;white-space:nowrap}
-.hero{padding:48px 18px 35px;text-align:center;background:radial-gradient(circle at 50% 0,#d9ebff,transparent 65%),#f3f7fc}
-.kicker{color:#1769aa;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
-h1{font-size:clamp(30px,5vw,48px);margin:12px 0 10px;color:#123d75}.hero p{max-width:620px;margin:0 auto;color:#5e7188;line-height:1.6;font-size:15px}
-.wrap{max-width:960px;margin:0 auto;padding:10px 18px 55px}
-.section-title{text-align:center;margin:15px 0 22px}.section-title h2{font-size:21px;margin:0 0 7px;color:#173c68}.section-title p{margin:0;color:var(--muted);font-size:13px}
-.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
-.card{background:white;border:1px solid #dce7f3;border-radius:20px;padding:27px;box-shadow:0 10px 28px #173c6810;transition:.2s}
-.card:hover{transform:translateY(-3px);box-shadow:0 14px 32px #173c6819}
-.symbol{height:54px;width:54px;border-radius:16px;display:grid;place-items:center;font-size:25px;margin-bottom:18px}
-.admin .symbol{background:#e8f1ff;color:#1769aa}.patrol .symbol{background:#e8f7ef;color:#198451}
-.card h3{font-size:20px;margin:0 0 8px}.card p{font-size:13px;line-height:1.55;color:#687b90;min-height:40px;margin:0 0 20px}
-button{border:0;border-radius:10px;padding:13px 17px;width:100%;font-size:14px;font-weight:700;cursor:pointer;background:#1769aa;color:white}
-.patrol button{background:#198451}button:hover{filter:brightness(.94)}
-.login{display:none;margin-top:18px;border-top:1px solid #e7edf4;padding-top:17px}.login.show{display:block}
-.login label{display:block;font-size:12px;font-weight:700;margin:10px 0 6px}.login input{width:100%;padding:12px;border:1px solid #cfdae7;border-radius:9px;font-size:14px}
-.note{font-size:11px!important;min-height:0!important;margin:12px 0 0!important;color:#75869a!important}
-.notice{margin:25px auto 0;background:#fff8e7;border:1px solid #f2dfad;color:#76551b;border-radius:12px;padding:12px 15px;font-size:12px;line-height:1.5;max-width:690px}
-footer{text-align:center;padding:20px;color:#718197;font-size:11px;border-top:1px solid #e2eaf2;background:#fff}
-@media(max-width:640px){.cards{grid-template-columns:1fr}.hero{padding-top:38px}.card{padding:23px}.top{padding:14px 18px}.top-tag{font-size:10px}}
+:root{--navy:#123d75;--blue:#1769aa;--green:#168451;--ink:#17324d;--muted:#657990}
+*{box-sizing:border-box}body{margin:0;background:#f2f6fc;color:var(--ink);font-family:Arial,sans-serif}
+header{background:linear-gradient(110deg,#102f60,#1769aa);color:#fff;padding:16px max(18px,calc((100% - 980px)/2));display:flex;align-items:center;justify-content:space-between}
+.brand{font-weight:800;letter-spacing:.4px}.brand small{display:block;font-size:11px;font-weight:400;opacity:.85;margin-top:4px}.tag{border:1px solid #ffffff70;border-radius:30px;padding:8px 12px;font-size:11px}
+.hero{text-align:center;padding:36px 18px 22px;background:radial-gradient(circle at 50% 0,#dcecff,transparent 68%)}
+.kicker{color:var(--blue);font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase}
+h1{color:var(--navy);font-size:clamp(28px,5vw,42px);margin:10px 0} .hero p{color:var(--muted);font-size:14px;line-height:1.5;margin:0}
+main{max-width:980px;margin:0 auto;padding:18px}.panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.panel,.workspace{background:#fff;border:1px solid #dce6f1;border-radius:17px;padding:22px;box-shadow:0 8px 24px #16385b0c}
+.panel h2,.workspace h2{margin:0 0 7px;color:var(--navy);font-size:20px}.sub{font-size:13px;color:var(--muted);line-height:1.5;margin:0 0 16px}
+button{background:var(--blue);color:white;border:0;border-radius:9px;padding:12px 15px;font-weight:700;cursor:pointer;width:100%;margin-top:10px}
+button.green{background:var(--green)}button.light{background:#eaf2fb;color:var(--navy)}button.danger{background:#9f3340}
+input,textarea,select{width:100%;padding:12px;border:1px solid #cbd8e7;border-radius:9px;font:14px Arial;margin:5px 0 11px;background:white}
+label{font-size:12px;font-weight:700;color:#334d68}
+.hidden{display:none!important}.status{font-size:13px;margin-top:10px;line-height:1.5;color:#a33}.ok{color:#137746}
+.workspace{margin-top:18px}.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:150px}
+.item{border:1px solid #e0e8f1;border-radius:10px;padding:13px;margin:10px 0}.item h3{font-size:15px;margin:0 0 6px}.item p{font-size:13px;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere}
+.pill{display:inline-block;background:#edf4fc;color:#22527f;border-radius:20px;padding:5px 9px;font-size:11px}
+footer{text-align:center;color:#74859a;font-size:11px;padding:24px}
+@media(max-width:650px){.panels{grid-template-columns:1fr}header{padding:14px 18px}.panel,.workspace{padding:19px}}
 </style></head>
 <body>
-<header class="top"><div class="brand"><div class="mark">OYMS</div><div><strong>OYMS SANKALP 4.0</strong><small>Online Youth Management System</small></div></div><div class="top-tag">SAMPLE PORTAL</div></header>
-<section class="hero"><div class="kicker">A connected youth network</div><h1>OYMS Sankalp 4.0</h1><p>A simple sample portal for the next phase of the Online Youth Management System. Choose your login category to preview the sign-in screen.</p></section>
-<main class="wrap"><div class="section-title"><h2>Select Login</h2><p>Only the two login categories planned for this sample portal</p></div>
-<div class="cards">
-<section class="card admin"><div class="symbol">♙</div><h3>Administrator Login</h3><p>For the portal administrator to access the administration area.</p><button type="button" onclick="toggleLogin('admin')">Administrator Sign In</button><div class="login" id="admin"><label for="admin-email">Email Address</label><input id="admin-email" type="email" placeholder="Enter administrator email"><label for="admin-pass">Password</label><input id="admin-pass" type="password" placeholder="Enter password"><button style="margin-top:14px" type="button" onclick="demoMessage()">Continue</button><p class="note">Sample screen only — authentication will be connected in the full website.</p></div></section>
-<section class="card patrol"><div class="symbol">♧</div><h3>Patrol Leader Login</h3><p>For registered patrol leaders to access their designated area.</p><button type="button" onclick="toggleLogin('patrol')">Patrol Leader Sign In</button><div class="login" id="patrol"><label for="patrol-id">Email / Login ID</label><input id="patrol-id" type="text" placeholder="Enter your login ID"><label for="patrol-pass">Password</label><input id="patrol-pass" type="password" placeholder="Enter password"><button style="margin-top:14px" type="button" onclick="demoMessage()">Continue</button><p class="note">Sample screen only — authentication will be connected in the full website.</p></div></section>
-</div><div class="notice"><strong>Preview version:</strong> This page demonstrates the portal design and the two login entry points. Login credentials, dashboards, database, and member-data features are not active in this sample.</div></main>
-<footer>OYMS Sankalp 4.0 · Sample Portal · Designed for mobile and desktop</footer>
-<script>
-function toggleLogin(id){document.querySelectorAll('.login').forEach(x=>x.classList.remove('show'));document.getElementById(id).classList.add('show');document.getElementById(id).scrollIntoView({behavior:'smooth',block:'nearest'})}
-function demoMessage(){alert('This is a sample portal. Login will be enabled in the full website.')}
+<header><div class="brand">OYMS SANKALP 4.0<small>Online Youth Management System · Sample Portal</small></div><div class="tag">KVS-INSPIRED PORTAL</div></header>
+<section class="hero"><div class="kicker">A connected youth network</div><h1>OYMS Sankalp 4.0</h1><p>Secure sign-in for the Administrator and Patrol Leaders.</p></section>
+<main>
+<div id="loginArea" class="panels">
+<section class="panel"><h2>Administrator Login</h2><p class="sub">Sign in with the administrator email and password.</p>
+<label>Email address</label><input id="adminEmail" type="email" autocomplete="username" placeholder="Administrator email">
+<label>Password</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Password">
+<button id="adminLogin">Administrator Sign In</button></section>
+<section class="panel"><h2>Patrol Leader Login</h2><p class="sub">Use the Login ID and password given by your Administrator.</p>
+<label>Login ID</label><input id="patrolId" autocomplete="username" placeholder="Your Login ID">
+<label>Password</label><input id="patrolPassword" type="password" autocomplete="current-password" placeholder="Password">
+<button class="green" id="patrolLogin">Patrol Leader Sign In</button></section>
+</div>
+<div id="loginStatus" class="status" role="status"></div>
+<section id="adminDash" class="workspace hidden">
+<div class="row"><div><h2>Administrator Dashboard</h2><p class="sub">Create patrol accounts and review submitted records.</p></div><div style="max-width:150px"><button class="light" id="adminLogout">Sign out</button></div></div>
+<h3>Create Patrol Leader Login</h3>
+<div class="row"><div><label>Patrol Leader name</label><input id="newName" placeholder="Full name"></div><div><label>Login ID</label><input id="newId" placeholder="e.g. patrol01"></div></div>
+<label>Temporary password (minimum 10 characters)</label><input id="newPass" type="password" autocomplete="new-password" placeholder="Create a strong temporary password">
+<button id="createPatrol">Create Patrol Leader Account</button><p id="createStatus" class="status"></p>
+<hr style="border:0;border-top:1px solid #e4ebf3;margin:22px 0">
+<h3>Patrol Submissions</h3><button class="light" id="refreshAdmin">Refresh submissions</button><div id="submissionList"></div>
+</section>
+<section id="patrolDash" class="workspace hidden">
+<div class="row"><div><h2>Patrol Leader Dashboard</h2><p class="sub" id="welcomePatrol"></p></div><div style="max-width:150px"><button class="light" id="patrolLogout">Sign out</button></div></div>
+<h3>Submit a Record</h3><label>Title</label><input id="recordTitle" placeholder="Enter record title">
+<label>Category</label><select id="recordCategory"><option>General</option><option>Attendance</option><option>Activity</option><option>Camp</option><option>Progress</option><option>Other</option></select>
+<label>Details</label><textarea id="recordDetails" rows="5" placeholder="Enter the record details"></textarea>
+<button class="green" id="submitRecord">Submit for Administrator Review</button><p id="submitStatus" class="status"></p>
+<h3 style="margin-top:24px">My Submissions</h3><button class="light" id="refreshMine">Refresh my records</button><div id="myList"></div>
+</section>
+</main><footer>OYMS Sankalp 4.0 · Separate sample portal database</footer>
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+const supabase = createClient("https://lozjlsffopmyyrstasxe.supabase.co","sb_publishable_G28jQNSBzQj0GMXu6LkTPg_YdEcyMhV");
+let currentUser=null, currentProfile=null;
+const el=id=>document.getElementById(id);
+function msg(id,text,ok=false){el(id).textContent=text;el(id).className=ok?"status ok":"status"}
+function show(role){el("loginArea").classList.toggle("hidden",!!role);el("loginStatus").textContent="";el("adminDash").classList.toggle("hidden",role!=="admin");el("patrolDash").classList.toggle("hidden",role!=="patrol_leader")}
+async function profileFor(user){const {data,error}=await supabase.from("profiles").select("user_id,login_id,full_name,role,is_active").eq("user_id",user.id).single();if(error)throw error;if(!data.is_active)throw new Error("This account is inactive. Contact the Administrator.");return data}
+async function login(email,password){msg("loginStatus","Signing in…");const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;currentUser=data.user;currentProfile=await profileFor(data.user);if(currentProfile.role==="admin"&&data.user.app_metadata?.portal==="oyms_sankalp_4"){show("admin");await loadSubmissions()}else if(currentProfile.role==="patrol_leader"&&data.user.app_metadata?.portal==="oyms_sankalp_4"){show("patrol_leader");el("welcomePatrol").textContent="Welcome, "+currentProfile.full_name;await loadMine()}else{await supabase.auth.signOut();throw new Error("This account is not registered for OYMS Sankalp 4.0.")}}
+el("adminLogin").onclick=async()=>{try{await login(el("adminEmail").value.trim(),el("adminPassword").value)}catch(e){msg("loginStatus",e.message)}};
+el("patrolLogin").onclick=async()=>{try{const id=el("patrolId").value.trim();if(!id)throw new Error("Enter your Login ID.");await login(id.toLowerCase()+"@oyms.local",el("patrolPassword").value)}catch(e){msg("loginStatus",e.message)}};
+async function logout(){await supabase.auth.signOut();currentUser=null;currentProfile=null;show(null)}
+el("adminLogout").onclick=logout;el("patrolLogout").onclick=logout;
+el("createPatrol").onclick=async()=>{msg("createStatus","Creating account…",true);const {data:{session}}=await supabase.auth.getSession();const {data,error}=await supabase.functions.invoke("create-patrol-account",{body:{login_id:el("newId").value.trim(),full_name:el("newName").value.trim(),password:el("newPass").value},headers:{Authorization:"Bearer "+session.access_token}});if(error){msg("createStatus",error.message);return}if(data?.error){msg("createStatus",data.error);return}msg("createStatus","Account created. Give the Login ID and temporary password directly to the Patrol Leader.",true);el("newName").value="";el("newId").value="";el("newPass").value=""};
+async function loadSubmissions(){const {data,error}=await supabase.from("patrol_submissions").select("id,title,category,details,status,submitted_at,patrol_leader_id,review_note").order("submitted_at",{ascending:false});if(error){el("submissionList").textContent=error.message;return}el("submissionList").innerHTML="";for(const s of data){const d=document.createElement("div");d.className="item";const h=document.createElement("h3");h.textContent=s.title;const p=document.createElement("p");p.textContent="Category: "+s.category+" · "+new Date(s.submitted_at).toLocaleString()+"\n"+JSON.stringify(s.details);const b=document.createElement("span");b.className="pill";b.textContent=s.status;d.append(h,b,p);if(s.status==="pending"){for(const [label,status] of [["Verify","verified"],["Request changes","needs_changes"]]){const btn=document.createElement("button");btn.className="light";btn.textContent=label;btn.onclick=()=>review(s.id,status);d.append(btn)}}el("submissionList").append(d)}}
+async function review(id,status){const {error}=await supabase.from("patrol_submissions").update({status,reviewed_by:currentUser.id,reviewed_at:new Date().toISOString()}).eq("id",id);if(error)alert(error.message);else await loadSubmissions()}
+el("refreshAdmin").onclick=loadSubmissions;
+el("submitRecord").onclick=async()=>{msg("submitStatus","Submitting…",true);const title=el("recordTitle").value.trim();if(!title){msg("submitStatus","Enter a title.");return}const {error}=await supabase.from("patrol_submissions").insert({patrol_leader_id:currentUser.id,title,category:el("recordCategory").value,details:{text:el("recordDetails").value.trim()}});if(error){msg("submitStatus",error.message);return}msg("submitStatus","Record submitted for Administrator review.",true);el("recordTitle").value="";el("recordDetails").value="";await loadMine()};
+async function loadMine(){const {data,error}=await supabase.from("patrol_submissions").select("title,category,status,submitted_at,review_note").eq("patrol_leader_id",currentUser.id).order("submitted_at",{ascending:false});if(error){el("myList").textContent=error.message;return}el("myList").innerHTML="";for(const s of data){const d=document.createElement("div");d.className="item";const h=document.createElement("h3");h.textContent=s.title;const p=document.createElement("p");p.textContent=s.category+" · "+new Date(s.submitted_at).toLocaleString();const b=document.createElement("span");b.className="pill";b.textContent=s.status;d.append(h,b,p);el("myList").append(d)}}
+el("refreshMine").onclick=loadMine;
 </script></body></html>
