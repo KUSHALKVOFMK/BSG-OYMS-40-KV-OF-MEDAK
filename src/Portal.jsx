@@ -205,13 +205,6 @@ export default function Portal(){
     const {error:update}=await supabase.from("member_records").update({otp_status:"verified"}).eq("id",otpRecord.id);
     setLoading(false);if(update){setMessage(update.message);return;}const {data:admins}=await supabase.from("profiles").select("id").eq("role","super_admin").limit(1);if(admins?.[0])await supabase.from("member_notifications").insert({recipient_user_id:admins[0].id,member_record_id:otpRecord.id,title:"Member email OTP verified",message:"The parent / guardian email OTP has been verified."});setOtpSent(false);setOtpValue("");setOtpSession(null);setOtpRecord(null);setMessage("Email OTP verified successfully.");await refreshData(profile.role,user.id);
   }
-  async function requestUnfreeze(row){
-    const reason=window.prompt("Why do you need this record unfrozen?");
-    if(!reason?.trim())return;
-    const {error}=await supabase.from("member_unfreeze_requests").insert({member_record_id:row.id,patrol_leader_id:user.id,reason:reason.trim()});
-    setMessage(error?error.message:"Unfreeze request sent to Super Admin.");await refreshData(profile.role,user.id);
-  }
-
   async function submitRecord(e){
     e.preventDefault();setLoading(true);setMessage("");
     let details={}; try{details=JSON.parse(recordForm.details || "{}");}catch{details={notes:recordForm.details};}
