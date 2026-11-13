@@ -36,6 +36,9 @@ export default function Portal(){
   const [memberForm,setMemberForm] = useState({first_name:"",middle_name:"",last_name:"",nickname:"",date_of_birth:"",gender:"",blood_group:"",father_name:"",father_occupation:"",mother_name:"",mother_occupation:"",residential_address:"",town_village:"",district:"",state:"Telangana",pin_code:"",primary_contact:"",whatsapp_number:"",alternative_contact:"",emergency_contact:"",emergency_contact_person:"",email:"",bsg_uid_known:false,bsg_uid:""});
   const [memberPhoto,setMemberPhoto] = useState(null);
   const [memberRows,setMemberRows] = useState([]);
+  const [editingMember,setEditingMember] = useState(null);
+  const [otpSession,setOtpSession] = useState(null);
+  const [otpRecord,setOtpRecord] = useState(null);
   const [memberReason,setMemberReason] = useState({});
   const [otpMember,setOtpMember] = useState(null);
   const [otpValue,setOtpValue] = useState("");
@@ -135,6 +138,70 @@ export default function Portal(){
     setMessage("Patrol Leader account created successfully. Share the Login ID securely with the leader.");
     setLeaderForm({login_id:"",full_name:"",patrol_name:"",mobile_number:"",password:"",category:"Scout",bsg_uid:""});
     await refreshData("super_admin",user.id);
+  }
+
+
+  async function saveMember(e){
+    e.preventDefault();setLoading(true);setMessage("");
+    let photoPath=editingMember?.photo_path||null;
+    if(memberPhoto){
+      const ext=memberPhoto.name.split(".").pop().toLowerCase(),path=user.id+"/"+crypto.randomUUID()+"."+ext;
+      const {error:upErr}=await supabase.storage.from("member-photos").upload(path,memberPhoto,{contentType:memberPhoto.type});
+      if(upErr){setLoading(false);setMessage(upErr.message);return;}photoPath=path;
+    }
+    const payload={...memberForm,category:profile.category||"Scout",patrol_leader_id:user.id,photo_path:photoPath,updated_at:new Date().toISOString()};
+    if(editingMember){
+      const {error}=await supabase.from("member_records").update(payload).eq("id",editingMember.id);
+      if(error){setLoading(false);setMessage(error.message);return;}
+    }else{
+      const {error}=await supabase.from("member_records").insert(payload);
+      if(error){setLoading(false);setMessage(error.message);return;}
+    }
+    setLoading(false);setEditingMember(null);setMemberPhoto(null);setMemberForm({first_name:"",middle_name:"",last_name:"",nickname:"",date_of_birth:"",gender:"",blood_group:"",father_name:"",father_occupation:"",mother_name:"",mother_occupation:"",residential_address:"",town_village:"",district:"",state:"Telangana",pin_code:"",primary_contact:"",whatsapp_number:"",alternative_contact:"",emergency_contact:"",emergency_contact_person:"",email:"",bsg_uid_known:false,bsg_uid:""});
+    setMessage("Member details saved. Mark Completed when the form is ready.");await refreshData(profile.role,user.id);
+  }
+  async function completeMember(row){
+    const {error}=await supabase.from("member_records").update({submission_status:"completed",review_status:"pending",updated_at:new Date().toISOString()}).eq("id",row.id);
+    if(error){setMessage(error.message);return;}setMessage("Member details submitted for Super Admin checking.");await refreshData(profile.role,user.id);
+  }
+  async function reviewMember(row,status){
+    const reason=(memberReason[row.id]||"").trim();
+    if(status==="disapproved"&&!reason){setMessage("Enter a reason for disapproval.");return;}
+    const {error}=await supabase.from("member_records").update({review_status:status,review_reason:status==="disapproved"?reason:"",updated_at:new Date().toISOString()}).eq("id",row.id);
+    if(error){setMessage(error.message);return;}
+    await supabase.from("member_notifications").insert({recipient_user_id:row.patrol_leader_id,member_record_id:row.id,title:status==="verified"?"Member details verified":"Corrections required",message:status==="verified"?"Details checked. You may now send the email OTP.":"Please correct the member record: "+reason});
+    setMessage("Review saved and Patrol Leader notified.");await refreshData(profile.role,user.id);
+  }
+  async function markOmsUpdated(row){
+    const {error}=await supabase.from("member_records").update({oms_status:"updated"}).eq("id",row.id);
+    if(error){setMessage(error.message);return;}setMessage("OMS marked updated.");await refreshData(profile.role,user.id);
+  }
+  async function finalApprove(row){
+    if(row.review_status!=="verified"||row.otp_status!=="verified"||row.oms_status!=="updated"){setMessage("Details, OTP and OMS must all be verified before final approval.");return;}
+    const {error}=await supabase.from("member_records").update({final_status:"approved",is_locked:true}).eq("id",row.id);
+    if(error){setMessage(error.message);return;}
+    await supabase.from("member_notifications").insert({recipient_user_id:row.patrol_leader_id,member_record_id:row.id,title:"Member record approved",message:"The member record is fully verified and now locked."});
+    setMessage("Member record approved and locked.");await refreshData(profile.role,user.id);
+  }
+  async function sendMemberOtp(row){
+    const {data:s}=await supabase.auth.getSession();setOtpSession(s.session);setOtpRecord(row);setLoading(true);
+    const {error}=await supabase.auth.signInWithOtp({email:row.email,options:{shouldCreateUser:true}});
+    setLoading(false);if(error){setMessage(error.message);return;}setOtpSent(true);setTab("otp");setMessage("OTP sent to the parent / guardian email. Enter it to verify.");
+  }
+  async function verifyMemberOtp(e){
+    e.preventDefault();if(!otpRecord||!otpSession)return;setLoading(true);
+    const {error}=await supabase.auth.verifyOtp({email:otpRecord.email,token:otpValue.trim(),type:"email"});
+    if(error){setLoading(false);setMessage(error.message);return;}
+    const {error:restore}=await supabase.auth.setSession({access_token:otpSession.access_token,refresh_token:otpSession.refresh_token});
+    if(restore){setLoading(false);setMessage("Email verified. Please sign in again to continue.");return;}
+    const {error:update}=await supabase.from("member_records").update({otp_status:"verified"}).eq("id",otpRecord.id);
+    setLoading(false);if(update){setMessage(update.message);return;}setOtpSent(false);setOtpValue("");setOtpSession(null);setOtpRecord(null);setMessage("Email OTP verified successfully.");await refreshData(profile.role,user.id);
+  }
+  async function requestUnfreeze(row){
+    const reason=window.prompt("Why do you need this record unfrozen?");
+    if(!reason?.trim())return;
+    const {error}=await supabase.from("member_unfreeze_requests").insert({member_record_id:row.id,patrol_leader_id:user.id,reason:reason.trim()});
+    setMessage(error?error.message:"Unfreeze request sent to Super Admin.");await refreshData(profile.role,user.id);
   }
 
   async function submitRecord(e){
