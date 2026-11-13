@@ -220,7 +220,7 @@ export default function Portal(){
       if(formUploadError){if(uploadedFormPaths.length)await supabase.storage.from("member-forms").remove(uploadedFormPaths);setLoading(false);setMessage("Membership form upload failed: "+formUploadError.message);return;}
       uploadedFormPaths.push(path);
     }
-    const payload={...memberForm,email:memberForm.email.trim().toLowerCase(),patrol_position:memberForm.patrol_position||"Patrol Member",category:profile.category||"Scout",patrol_leader_id:user.id,photo_path:photoPath,form_file_paths:[...existingFormPaths,...uploadedFormPaths],submission_status:"draft",review_status:"pending",review_reason:"",otp_status:"not_required",final_status:"pending",is_locked:false,updated_at:new Date().toISOString()};
+    const payload={...memberForm,email:memberForm.email.trim().toLowerCase(),patrol_position:memberForm.patrol_position||"Patrol Member",category:profile.category||"Scout",patrol_leader_id:user.id,photo_path:photoPath,form_file_paths:[...existingFormPaths,...uploadedFormPaths],submission_status:"draft",review_status:"pending",review_reason:"",otp_status:"not_sent",final_status:"pending",is_locked:false,updated_at:new Date().toISOString()};
     if(editingMember){
       const {error}=await supabase.from("member_records").update(payload).eq("id",editingMember.id);
       if(error){if(uploadedFormPaths.length)await supabase.storage.from("member-forms").remove(uploadedFormPaths);setLoading(false);setMessage(error.message);return;}
