@@ -29,12 +29,21 @@ export default function Portal(){
   const [recordForm,setRecordForm] = useState({title:"",category:"General",details:""});
   const [noticeForm,setNoticeForm] = useState({title:"",message:""});
   const [filter,setFilter] = useState("all");
+  const [newPassword,setNewPassword] = useState("");
 
   useEffect(()=>{ supabase.auth.getSession().then(({data})=>{ if(data.session?.user) enterPortal(data.session.user); }); },[]);
 
   async function enterPortal(authUser){
-    const role = authUser.app_metadata?.role;
-    const portal = authUser.app_metadata?.portal;
+    let role = authUser.app_metadata?.role;
+    let portal = authUser.app_metadata?.portal;
+    if((authUser.email||"").toLowerCase()===ADMIN_EMAIL && (role!=="admin" || portal!==PORTAL)){
+      const {error:claimError}=await supabase.rpc("claim_oyms_admin");
+      if(claimError){await supabase.auth.signOut();setMessage("Administrator activation could not be completed: "+claimError.message);return;}
+      const {data:refreshData}=await supabase.auth.refreshSession();
+      if(refreshData?.session?.user) authUser=refreshData.session.user;
+      role=authUser.app_metadata?.role;
+      portal=authUser.app_metadata?.portal;
+    }
     if(portal !== PORTAL || !["admin","patrol_leader"].includes(role)){
       await supabase.auth.signOut();
       setMessage("This account is not authorised for OYMS Sankalp 4.0.");
@@ -75,6 +84,21 @@ export default function Portal(){
       const err=[s,n].find(x=>x.error); if(err)setMessage(err.error.message);
     }
     setLoading(false);
+  }
+
+  async function requestAdminActivation(){
+    setLoading(true);setMessage("");
+    const {error}=await supabase.auth.signInWithOtp({email:ADMIN_EMAIL,options:{shouldCreateUser:true}});
+    setLoading(false);
+    setMessage(error?error.message:"A secure sign-in link has been sent to the administrator email. Open it on this device to activate the Admin account.");
+  }
+
+  async function changePassword(e){
+    e.preventDefault();
+    if(newPassword.length<10){setMessage("Choose a password with at least 10 characters.");return;}
+    setLoading(true);const {error}=await supabase.auth.updateUser({password:newPassword});setLoading(false);
+    if(error){setMessage(error.message);return;}
+    setNewPassword("");setMessage("Password updated successfully.");
   }
 
   async function signIn(e){
@@ -152,7 +176,7 @@ export default function Portal(){
 
   if(page==="login") return <div className="auth-page"><button className="back" onClick={()=>{setPage("choose");setMessage("");}}>← Back to Login Selection</button><div className="auth-card"><div className="mini-crest">{loginType==="admin"?"ADMIN":"BSG"}</div><span className="eyebrow">{loginType==="admin"?"ADMINISTRATOR ACCESS":"PATROL LEADER ACCESS"}</span><h2>{loginType==="admin"?"Admin Login":"Patrol Login"}</h2><p>{loginType==="admin"?"Sign in with the registered administrator email and password.":"Sign in using the Login ID and password created by your Administrator."}</p>
     <form onSubmit={signIn} className="auth-form"><label>{loginType==="admin"?"Admin Email":"Patrol Login ID"}<input required type={loginType==="admin"?"email":"text"} autoComplete="username" value={loginId} onChange={e=>setLoginId(e.target.value)} placeholder={loginType==="admin"?"Administrator email":"Enter your Login ID"}/></label><label>Password<input required type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Enter your password"/></label><button className="primary block" disabled={loading}>{loading?"Signing in…":"LOGIN SECURELY"} <ArrowRight size={17}/></button></form>
-    {loginType==="admin"&&<button className="link-button" onClick={async()=>{if(!loginId.trim()){setMessage("Enter your admin email first.");return;}setLoading(true);const {error}=await supabase.auth.resetPasswordForEmail(loginId.trim().toLowerCase());setLoading(false);setMessage(error?error.message:"If this email has an OYMS account, a password reset link has been sent.");}}>Forgot password?</button>}
+    {loginType==="admin"&&<><button className="link-button" onClick={async()=>{if(!loginId.trim()){setMessage("Enter your admin email first.");return;}setLoading(true);const {error}=await supabase.auth.resetPasswordForEmail(loginId.trim().toLowerCase());setLoading(false);setMessage(error?error.message:"If this email has an OYMS account, a password reset link has been sent.");}}>Forgot password?</button><button className="link-button" onClick={requestAdminActivation} disabled={loading}>First-time Admin? Send secure activation link</button></>}
     {message&&<div className="notice-message"><AlertCircle size={16}/>{message}</div>}<div className="security-line"><LockKeyhole size={15}/> Your role is checked by the secure database after sign-in.</div></div></div>;
 
   if(page==="app" && user && profile) return <div className="app-layout">
@@ -165,7 +189,7 @@ export default function Portal(){
       {tab==="submissions"&&<section className="panel"><div className="section-title"><div><span className="eyebrow">{isAdmin?"ADMIN REVIEW":"YOUR RECORDS"}</span><h2>{isAdmin?"All Submissions":"My Submissions"}</h2></div><select value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">All statuses</option><option value="pending">Pending</option><option value="verified">Verified</option><option value="needs_changes">Needs Changes</option><option value="completed">Completed</option></select></div><SubmissionList rows={submissions.filter(x=>filter==="all"||x.status===filter)} isAdmin={isAdmin} onStatus={updateStatus}/></section>}
       {tab==="notifications"&&<><section className="panel"><div className="section-title"><div><span className="eyebrow">PORTAL MESSAGES</span><h2>Notifications</h2></div></div>{notifications.map(x=><article className="notification-item" key={x.id}><Bell size={18}/><div><b>{x.title}</b><p>{x.message}</p><small>{dateLabel(x.created_at)}</small></div>{!isAdmin&&!x.read_at&&<button className="outline" onClick={()=>markRead(x)}>Mark read</button>}</article>)}{!notifications.length&&<p className="empty">No notifications yet.</p>}</section>{isAdmin&&<form className="panel data-form" onSubmit={sendNotification}><h3 className="wide">Send message to all active Patrol Leaders</h3><label className="wide">Title<input required value={noticeForm.title} onChange={e=>setNoticeForm({...noticeForm,title:e.target.value})}/></label><label className="wide">Message<textarea required rows="3" value={noticeForm.message} onChange={e=>setNoticeForm({...noticeForm,message:e.target.value})}/></label><button className="primary" disabled={loading}>Send Notification <Bell size={16}/></button></form>}</>}
       {tab==="audit"&&isAdmin&&<section className="panel"><h2>Activity Log</h2><div className="table-wrap"><table><thead><tr><th>Action</th><th>Table</th><th>Record ID</th><th>Date</th></tr></thead><tbody>{audit.map(x=><tr key={x.id}><td>{x.action}</td><td>{x.entity_table}</td><td>{x.record_id||"—"}</td><td>{dateLabel(x.created_at)}</td></tr>)}</tbody></table></div></section>}
-      {tab==="profile"&&<section className="panel profile"><div className="avatar">{(profile.full_name||"U").slice(0,1)}</div><h2>{profile.full_name}</h2><p>{profile.role==="admin"?"Administrator":"Patrol Leader"}</p><dl><dt>Login ID</dt><dd>{profile.login_id}</dd><dt>Patrol</dt><dd>{profile.patrol_name||"—"}</dd><dt>Email</dt><dd>{profile.email_address||user.email||"—"}</dd><dt>Mobile</dt><dd>{profile.mobile_number||"—"}</dd><dt>Account status</dt><dd>{profile.is_active?"Active":"Inactive"}</dd></dl></section>}
+      {tab==="profile"&&<><section className="panel profile"><div className="avatar">{(profile.full_name||"U").slice(0,1)}</div><h2>{profile.full_name}</h2><p>{profile.role==="admin"?"Administrator":"Patrol Leader"}</p><dl><dt>Login ID</dt><dd>{profile.login_id}</dd><dt>Patrol</dt><dd>{profile.patrol_name||"—"}</dd><dt>Email</dt><dd>{profile.email_address||user.email||"—"}</dd><dt>Mobile</dt><dd>{profile.mobile_number||"—"}</dd><dt>Account status</dt><dd>{profile.is_active?"Active":"Inactive"}</dd></dl></section><form className="panel data-form" onSubmit={changePassword}><h3 className="wide">Change Password</h3><label className="wide">New password<input required type="password" minLength="10" value={newPassword} onChange={e=>setNewPassword(e.target.value)} placeholder="At least 10 characters"/></label><button className="primary" disabled={loading}>Update Password</button></form></>}
     </main><footer className="app-footer">{DIVISION} · OYMS SANKALP 4.0</footer></section></div>;
 
   return <div className="auth-page"><div className="auth-card"><h2>Loading portal…</h2></div></div>;
