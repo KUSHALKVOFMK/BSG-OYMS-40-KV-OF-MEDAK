@@ -36,6 +36,7 @@ declare
   existing_count integer;
 begin
   if tg_op = 'INSERT' then
+    perform pg_advisory_xact_lock(hashtextextended(new.patrol_leader_id::text, 0));
     select count(*) into existing_count
     from public.member_records
     where patrol_leader_id = new.patrol_leader_id;
