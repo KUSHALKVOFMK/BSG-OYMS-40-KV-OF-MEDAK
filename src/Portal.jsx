@@ -72,23 +72,25 @@ export default function Portal(){
   async function refreshData(role,userId){
     setLoading(true);
     if(role==="super_admin"){
-      const [l,s,n,a] = await Promise.all([
+      const [l,s,n,a,m,u]=await Promise.all([
         supabase.from("profiles").select("*").eq("role","patrol_leader").order("created_at",{ascending:false}),
         supabase.from("patrol_submissions").select("*").order("submitted_at",{ascending:false}),
         supabase.from("member_notifications").select("*").order("created_at",{ascending:false}).limit(100),
-        supabase.from("audit_logs").select("*").order("created_at",{ascending:false}).limit(100)
+        supabase.from("audit_logs").select("*").order("created_at",{ascending:false}).limit(100),
+        supabase.from("member_records").select("*").order("created_at",{ascending:false}),
+        supabase.from("member_unfreeze_requests").select("*").order("created_at",{ascending:false})
       ]);
-      if(l.data)setLeaders(l.data); if(s.data)setSubmissions(s.data); if(n.data)setNotifications(n.data);
-      const {data:mr,error:me}=await supabase.from("member_records").select("*").eq("patrol_leader_id",userId).order("created_at",{ascending:false}); if(mr)setMemberRows(mr); if(me)setMessage(me.message); const {data:ur}=await supabase.from("member_unfreeze_requests").select("*").order("created_at",{ascending:false}); if(ur)setUnfreezeRequests(ur); if(a.data)setAudit(a.data);
-      const {data:mr,error:me}=await supabase.from("member_records").select("*").order("created_at",{ascending:false}); if(mr)setMemberRows(mr); if(me)setMessage(me.message);
-      const err=[l,s,n,a].find(x=>x.error); if(err)setMessage(err.error.message);
-    } else {
-      const [s,n] = await Promise.all([
+      if(l.data)setLeaders(l.data);if(s.data)setSubmissions(s.data);if(n.data)setNotifications(n.data);if(a.data)setAudit(a.data);if(m.data)setMemberRows(m.data);if(u.data)setUnfreezeRequests(u.data);
+      const err=[l,s,n,a,m,u].find(x=>x.error);if(err)setMessage(err.error.message);
+    }else{
+      const [s,n,m,u]=await Promise.all([
         supabase.from("patrol_submissions").select("*").eq("patrol_leader_id",userId).order("submitted_at",{ascending:false}),
-        supabase.from("portal_notifications").select("*").eq("recipient_user_id",userId).order("created_at",{ascending:false})
+        supabase.from("member_notifications").select("*").eq("recipient_user_id",userId).order("created_at",{ascending:false}),
+        supabase.from("member_records").select("*").eq("patrol_leader_id",userId).order("created_at",{ascending:false}),
+        supabase.from("member_unfreeze_requests").select("*").eq("patrol_leader_id",userId).order("created_at",{ascending:false})
       ]);
-      if(s.data)setSubmissions(s.data); if(n.data)setNotifications(n.data);
-      const err=[s,n].find(x=>x.error); if(err)setMessage(err.error.message);
+      if(s.data)setSubmissions(s.data);if(n.data)setNotifications(n.data);if(m.data)setMemberRows(m.data);if(u.data)setUnfreezeRequests(u.data);
+      const err=[s,n,m,u].find(x=>x.error);if(err)setMessage(err.error.message);
     }
     setLoading(false);
   }
@@ -153,7 +155,7 @@ export default function Portal(){
       const {error:upErr}=await supabase.storage.from("member-photos").upload(path,memberPhoto,{contentType:memberPhoto.type});
       if(upErr){setLoading(false);setMessage(upErr.message);return;}photoPath=path;
     }
-    const payload={...memberForm,category:profile.category||"Scout",patrol_leader_id:user.id,photo_path:photoPath,updated_at:new Date().toISOString()};
+    const payload={...memberForm,category:profile.category||"Scout",patrol_leader_id:user.id,photo_path:photoPath,submission_status:"draft",review_status:"pending",review_reason:"",otp_status:"not_sent",final_status:"pending",is_locked:false,updated_at:new Date().toISOString()};
     if(editingMember){
       const {error}=await supabase.from("member_records").update(payload).eq("id",editingMember.id);
       if(error){setLoading(false);setMessage(error.message);return;}
