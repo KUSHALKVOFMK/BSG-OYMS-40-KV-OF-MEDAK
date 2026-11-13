@@ -73,7 +73,9 @@ export default function Portal(){
         supabase.from("portal_notifications").select("*").order("created_at",{ascending:false}).limit(100),
         supabase.from("audit_logs").select("*").order("created_at",{ascending:false}).limit(100)
       ]);
-      if(l.data)setLeaders(l.data); if(s.data)setSubmissions(s.data); if(n.data)setNotifications(n.data); if(a.data)setAudit(a.data);
+      if(l.data)setLeaders(l.data); if(s.data)setSubmissions(s.data); if(n.data)setNotifications(n.data);
+      const {data:mr,error:me}=await supabase.from("member_records").select("*").eq("patrol_leader_id",userId).order("created_at",{ascending:false}); if(mr)setMemberRows(mr); if(me)setMessage(me.message); if(a.data)setAudit(a.data);
+      const {data:mr,error:me}=await supabase.from("member_records").select("*").order("created_at",{ascending:false}); if(mr)setMemberRows(mr); if(me)setMessage(me.message);
       const err=[l,s,n,a].find(x=>x.error); if(err)setMessage(err.error.message);
     } else {
       const [s,n] = await Promise.all([
@@ -131,8 +133,8 @@ export default function Portal(){
     setLoading(false);
     if(error || data?.error){setMessage(data?.error || error.message);return;}
     setMessage("Patrol Leader account created successfully. Share the Login ID securely with the leader.");
-    setLeaderForm({login_id:"",full_name:"",patrol_name:"Panther",mobile_number:"",password:""});
-    await refreshData("admin",user.id);
+    setLeaderForm({login_id:"",full_name:"",patrol_name:"",mobile_number:"",password:"",category:"Scout",bsg_uid:""});
+    await refreshData("super_admin",user.id);
   }
 
   async function submitRecord(e){
@@ -170,6 +172,7 @@ export default function Portal(){
   }
 
   const isAdmin=profile?.role==="super_admin";
+  const visibleMemberRows=memberRows.filter(x=>isAdmin||x.patrol_leader_id===user?.id);
   const nav=isAdmin?[
     ["dashboard","Dashboard",Home],["leaders","Patrols",Users],["members","Member Records",ClipboardList],["notifications","Notifications",Bell],["audit","Unfreeze Requests",FileText],["profile","My Profile",UserCircle]
   ]:[
