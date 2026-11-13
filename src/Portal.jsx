@@ -36,39 +36,29 @@ export default function Portal(){
   useEffect(()=>{ supabase.auth.getSession().then(({data})=>{ if(data.session?.user) enterPortal(data.session.user); }); },[]);
 
   async function enterPortal(authUser){
-    let role = authUser.app_metadata?.role;
-    let portal = authUser.app_metadata?.portal;
-    if((authUser.email||"").toLowerCase()===ADMIN_EMAIL && (role!=="admin" || portal!==PORTAL)){
-      const {error:claimError}=await supabase.rpc("claim_oyms_admin");
-      if(claimError){await supabase.auth.signOut();setMessage("Administrator activation could not be completed: "+claimError.message);return;}
-      const {data:refreshData}=await supabase.auth.refreshSession();
-      if(refreshData?.session?.user) authUser=refreshData.session.user;
-      role=authUser.app_metadata?.role;
-      portal=authUser.app_metadata?.portal;
-    }
-    if(portal !== PORTAL || !["admin","patrol_leader"].includes(role)){
+    const {data:p,error} = await supabase.from("profiles").select("*").eq("id",authUser.id).maybeSingle();
+    if(error || !p || !p.is_active || !["super_admin","patrol_leader"].includes(p.role)){
       await supabase.auth.signOut();
       setMessage("This account is not authorised for OYMS Sankalp 4.0.");
       return;
     }
-    if(role==="admin" && (authUser.email||"").toLowerCase()!==ADMIN_EMAIL){
+    if(p.role==="super_admin" && (authUser.email||"").toLowerCase()!==ADMIN_EMAIL){
       await supabase.auth.signOut();
-      setMessage("Use the registered OYMS administrator email for Admin Login.");
+      setMessage("Use the registered Admin email address.");
       return;
     }
-    const {data:p,error} = await supabase.from("profiles").select("*").eq("user_id",authUser.id).maybeSingle();
-    if(error || !p || !p.is_active || p.role!==role){
+    if(p.role==="patrol_leader" && !(authUser.email||"").toLowerCase().endsWith("@oyms.local")){
       await supabase.auth.signOut();
-      setMessage("Your OYMS profile is missing or inactive. Contact the portal administrator.");
+      setMessage("This account is not a registered Patrol Leader account.");
       return;
     }
     setUser(authUser); setProfile(p); setPage("app"); setTab("dashboard"); setMessage("");
-    await refreshData(role,authUser.id);
+    await refreshData(p.role,authUser.id);
   }
 
   async function refreshData(role,userId){
     setLoading(true);
-    if(role==="admin"){
+    if(role==="super_admin"){
       const [l,s,n,a] = await Promise.all([
         supabase.from("profiles").select("*").eq("role","patrol_leader").order("created_at",{ascending:false}),
         supabase.from("patrol_submissions").select("*").order("submitted_at",{ascending:false}),
@@ -171,7 +161,7 @@ export default function Portal(){
     await refreshData(profile.role,user.id);
   }
 
-  const isAdmin=profile?.role==="admin";
+  const isAdmin=profile?.role==="super_admin";
   const nav=isAdmin?[
     ["dashboard","Dashboard",Home],["leaders","Patrol Leaders",Users],["submissions","Submissions",ClipboardList],["notifications","Notifications",Bell],["audit","Activity Log",FileText],["profile","My Profile",UserCircle]
   ]:[
@@ -203,7 +193,7 @@ export default function Portal(){
       {tab==="submissions"&&<section className="panel"><div className="section-title"><div><span className="eyebrow">{isAdmin?"ADMIN REVIEW":"YOUR RECORDS"}</span><h2>{isAdmin?"All Submissions":"My Submissions"}</h2></div><select value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">All statuses</option><option value="pending">Pending</option><option value="verified">Verified</option><option value="needs_changes">Needs Changes</option><option value="completed">Completed</option></select></div><SubmissionList rows={submissions.filter(x=>filter==="all"||x.status===filter)} isAdmin={isAdmin} onStatus={updateStatus}/></section>}
       {tab==="notifications"&&<><section className="panel"><div className="section-title"><div><span className="eyebrow">PORTAL MESSAGES</span><h2>Notifications</h2></div></div>{notifications.map(x=><article className="notification-item" key={x.id}><Bell size={18}/><div><b>{x.title}</b><p>{x.message}</p><small>{dateLabel(x.created_at)}</small></div>{!isAdmin&&!x.read_at&&<button className="outline" onClick={()=>markRead(x)}>Mark read</button>}</article>)}{!notifications.length&&<p className="empty">No notifications yet.</p>}</section>{isAdmin&&<form className="panel data-form" onSubmit={sendNotification}><h3 className="wide">Send message to all active Patrol Leaders</h3><label className="wide">Title<input required value={noticeForm.title} onChange={e=>setNoticeForm({...noticeForm,title:e.target.value})}/></label><label className="wide">Message<textarea required rows="3" value={noticeForm.message} onChange={e=>setNoticeForm({...noticeForm,message:e.target.value})}/></label><button className="primary" disabled={loading}>Send Notification <Bell size={16}/></button></form>}</>}
       {tab==="audit"&&isAdmin&&<section className="panel"><h2>Activity Log</h2><div className="table-wrap"><table><thead><tr><th>Action</th><th>Table</th><th>Record ID</th><th>Date</th></tr></thead><tbody>{audit.map(x=><tr key={x.id}><td>{x.action}</td><td>{x.entity_table}</td><td>{x.record_id||"—"}</td><td>{dateLabel(x.created_at)}</td></tr>)}</tbody></table></div></section>}
-      {tab==="profile"&&<><section className="panel profile"><div className="avatar">{(profile.full_name||"U").slice(0,1)}</div><h2>{profile.full_name}</h2><p>{profile.role==="admin"?"Administrator":"Patrol Leader"}</p><dl><dt>Login ID</dt><dd>{profile.login_id}</dd><dt>Patrol</dt><dd>{profile.patrol_name||"—"}</dd><dt>Email</dt><dd>{profile.email_address||user.email||"—"}</dd><dt>Mobile</dt><dd>{profile.mobile_number||"—"}</dd><dt>Account status</dt><dd>{profile.is_active?"Active":"Inactive"}</dd></dl></section><form className="panel data-form" onSubmit={changePassword}><h3 className="wide">{isAdmin&&user?.user_metadata?.password_initialized!==true?"Set Admin Password":"Change Password"}</h3>{!(isAdmin&&user?.user_metadata?.password_initialized!==true)&&<label className="wide">Current password<input required type="password" autoComplete="current-password" value={currentPassword} onChange={e=>setCurrentPassword(e.target.value)} placeholder="Enter current password"/></label>}<label>New password<input required type="password" autoComplete="new-password" minLength="10" value={newPassword} onChange={e=>setNewPassword(e.target.value)} placeholder="At least 10 characters"/></label><label>Confirm new password<input required type="password" autoComplete="new-password" minLength="10" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} placeholder="Re-enter new password"/></label><button className="primary" disabled={loading}>{loading?"Saving…":isAdmin&&user?.user_metadata?.password_initialized!==true?"Set Password":"Update Password"}</button></form></>}
+      {tab==="profile"&&<><section className="panel profile"><div className="avatar">{(profile.full_name||"U").slice(0,1)}</div><h2>{profile.full_name}</h2><p>{profile.role==="super_admin"?"Administrator":"Patrol Leader"}</p><dl><dt>Login ID</dt><dd>{profile.login_id}</dd><dt>Patrol</dt><dd>{profile.patrol_name||"—"}</dd><dt>Email</dt><dd>{profile.email_address||user.email||"—"}</dd><dt>Mobile</dt><dd>{profile.mobile_number||"—"}</dd><dt>Account status</dt><dd>{profile.is_active?"Active":"Inactive"}</dd></dl></section><form className="panel data-form" onSubmit={changePassword}><h3 className="wide">{isAdmin&&user?.user_metadata?.password_initialized!==true?"Set Admin Password":"Change Password"}</h3>{!(isAdmin&&user?.user_metadata?.password_initialized!==true)&&<label className="wide">Current password<input required type="password" autoComplete="current-password" value={currentPassword} onChange={e=>setCurrentPassword(e.target.value)} placeholder="Enter current password"/></label>}<label>New password<input required type="password" autoComplete="new-password" minLength="10" value={newPassword} onChange={e=>setNewPassword(e.target.value)} placeholder="At least 10 characters"/></label><label>Confirm new password<input required type="password" autoComplete="new-password" minLength="10" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} placeholder="Re-enter new password"/></label><button className="primary" disabled={loading}>{loading?"Saving…":isAdmin&&user?.user_metadata?.password_initialized!==true?"Set Password":"Update Password"}</button></form></>}
     </main><footer className="app-footer">{DIVISION} · OYMS SANKALP 4.0</footer></section></div>;
 
   return <div className="auth-page"><div className="auth-card"><h2>Loading portal…</h2></div></div>;
