@@ -88,7 +88,7 @@ export default function Portal(){
 
   async function requestAdminActivation(){
     setLoading(true);setMessage("");
-    const {error}=await supabase.auth.signInWithOtp({email:ADMIN_EMAIL,options:{shouldCreateUser:true}});
+    const {error}=await supabase.auth.signInWithOtp({email:ADMIN_EMAIL,options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+window.location.pathname}});
     setLoading(false);
     setMessage(error?error.message:"A secure sign-in link has been sent to the administrator email. Open it on this device to activate the Admin account.");
   }
