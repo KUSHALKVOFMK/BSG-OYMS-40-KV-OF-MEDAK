@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { ShieldCheck, Users, ClipboardList, Bell, FileText, LogOut, ArrowRight, LockKeyhole, Menu, X, CheckCircle2, Clock3, AlertCircle, Plus, Search, Flag, Home, UserCircle, RefreshCw } from "lucide-react";
 
-const supabase = createClient("https://kasnukztvipaxtqniktj.supabase.co", "sb_publishable_fcvOMSaKVJGMEXgUqB7CFg_NbwaLVJ0");
+const SUPABASE_URL = "https://kasnukztvipaxtqniktj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_fcvOMSaKVJGMEXgUqB7CFg_NbwaLVJ0";
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const otpClient = createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
 const ADMIN_EMAIL = "kushalkvofmkbsgindiaoyms@gmail.com";
 const PORTAL = "oyms_sankalp_4";
 const SCHOOL = "PM SHRI Kendriya Vidyalaya, Ordnance Factory, Medak";
@@ -192,18 +195,16 @@ export default function Portal(){
     setMessage("Member record approved and locked.");await refreshData(profile.role,user.id);
   }
   async function sendMemberOtp(row){
-    const {data:s}=await supabase.auth.getSession();setOtpSession(s.session);setOtpRecord(row);setLoading(true);
-    const {error}=await supabase.auth.signInWithOtp({email:row.email,options:{shouldCreateUser:true}});
+    setOtpRecord(row);setLoading(true);
+    const {error}=await otpClient.auth.signInWithOtp({email:row.email,options:{shouldCreateUser:true}});
     setLoading(false);if(error){setMessage(error.message);return;}setOtpSent(true);setTab("otp");setMessage("OTP sent to the parent / guardian email. Enter it to verify.");
   }
   async function verifyMemberOtp(e){
-    e.preventDefault();if(!otpRecord||!otpSession)return;setLoading(true);
-    const {error}=await supabase.auth.verifyOtp({email:otpRecord.email,token:otpValue.trim(),type:"email"});
+    e.preventDefault();if(!otpRecord)return;setLoading(true);
+    const {error}=await otpClient.auth.verifyOtp({email:otpRecord.email,token:otpValue.trim(),type:"email"});
     if(error){setLoading(false);setMessage(error.message);return;}
-    const {error:restore}=await supabase.auth.setSession({access_token:otpSession.access_token,refresh_token:otpSession.refresh_token});
-    if(restore){setLoading(false);setMessage("Email verified. Please sign in again to continue.");return;}
     const {error:update}=await supabase.from("member_records").update({otp_status:"verified"}).eq("id",otpRecord.id);
-    setLoading(false);if(update){setMessage(update.message);return;}setOtpSent(false);setOtpValue("");setOtpSession(null);setOtpRecord(null);setMessage("Email OTP verified successfully.");await refreshData(profile.role,user.id);
+    setLoading(false);if(update){setMessage(update.message);return;}setOtpSent(false);setOtpValue("");setOtpRecord(null);setMessage("Email OTP verified successfully.");await refreshData(profile.role,user.id);
   }
   async function submitRecord(e){
     e.preventDefault();setLoading(true);setMessage("");
