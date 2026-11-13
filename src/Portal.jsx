@@ -201,19 +201,19 @@ export default function Portal(){
   async function sendMemberOtp(row){
     if(!row?.email){setMessage("This member has no registered email address.");return;}
     setOtpRecord(row);setLoading(true);setMessage("");
-    const {data,error}=await supabase.functions.invoke("member-email-otp",{body:{action:"send",member_id:row.id}});
-    setLoading(false);
-    if(error||data?.error){setMessage(data?.error||error.message||"Could not send OTP.");return;}
+    const {error}=await otpClient.auth.signInWithOtp({email:row.email,options:{shouldCreateUser:true}});
+    setLoading(false);if(error){setMessage(error.message);return;}
     setOtpSent(true);setOtpValue("");setTab("otp");
-    setMessage(data?.message||"A six-digit OTP was sent to the member's registered email.");
+    setMessage("OTP sent to the member's registered email. Enter it to verify.");
   }
   async function verifyMemberOtp(e){
     e.preventDefault();if(!otpRecord)return;setLoading(true);setMessage("");
-    const {data,error}=await supabase.functions.invoke("member-email-otp",{body:{action:"verify",member_id:otpRecord.id,code:otpValue.trim()}});
-    setLoading(false);
-    if(error||data?.error){setMessage(data?.error||error.message||"OTP verification failed.");return;}
+    const {error}=await otpClient.auth.verifyOtp({email:otpRecord.email,token:otpValue.trim(),type:"email"});
+    if(error){setLoading(false);setMessage(error.message);return;}
+    const {error:update}=await supabase.from("member_records").update({otp_status:"verified"}).eq("id",otpRecord.id);
+    setLoading(false);if(update){setMessage(update.message);return;}
     setOtpSent(false);setOtpValue("");setOtpRecord(null);
-    setMessage(data?.message||"Email OTP verified successfully.");
+    setMessage("Email OTP verified successfully.");
     await refreshData(profile.role,user.id);
   }
   async function submitRecord(e){
