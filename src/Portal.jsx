@@ -168,7 +168,7 @@ export default function Portal(){
   }
   async function completeMember(row){
     const {error}=await supabase.from("member_records").update({submission_status:"completed",review_status:"pending",updated_at:new Date().toISOString()}).eq("id",row.id);
-    if(error){setMessage(error.message);return;}setMessage("Member details submitted for Super Admin checking.");await refreshData(profile.role,user.id);
+    if(error){setMessage(error.message);return;}const {data:admins}=await supabase.from("profiles").select("id").eq("role","super_admin").limit(1);if(admins?.[0])await supabase.from("member_notifications").insert({recipient_user_id:admins[0].id,member_record_id:row.id,title:"Member form completed",message:"A Patrol Leader has submitted a member record for verification."});setMessage("Member details submitted for Super Admin checking.");await refreshData(profile.role,user.id);
   }
   async function reviewMember(row,status){
     const reason=(memberReason[row.id]||"").trim();
@@ -201,7 +201,7 @@ export default function Portal(){
     const {error:restore}=await supabase.auth.setSession({access_token:otpSession.access_token,refresh_token:otpSession.refresh_token});
     if(restore){setLoading(false);setMessage("Email verified. Please sign in again to continue.");return;}
     const {error:update}=await supabase.from("member_records").update({otp_status:"verified"}).eq("id",otpRecord.id);
-    setLoading(false);if(update){setMessage(update.message);return;}setOtpSent(false);setOtpValue("");setOtpSession(null);setOtpRecord(null);setMessage("Email OTP verified successfully.");await refreshData(profile.role,user.id);
+    setLoading(false);if(update){setMessage(update.message);return;}const {data:admins}=await supabase.from("profiles").select("id").eq("role","super_admin").limit(1);if(admins?.[0])await supabase.from("member_notifications").insert({recipient_user_id:admins[0].id,member_record_id:otpRecord.id,title:"Member email OTP verified",message:"The parent / guardian email OTP has been verified."});setOtpSent(false);setOtpValue("");setOtpSession(null);setOtpRecord(null);setMessage("Email OTP verified successfully.");await refreshData(profile.role,user.id);
   }
   async function requestUnfreeze(row){
     const reason=window.prompt("Why do you need this record unfrozen?");
