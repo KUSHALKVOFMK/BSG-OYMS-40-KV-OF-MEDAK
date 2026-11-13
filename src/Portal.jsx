@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { ShieldCheck, Users, ClipboardList, Bell, FileText, LogOut, ArrowRight, LockKeyhole, Menu, X, CheckCircle2, Clock3, AlertCircle, Plus, Search, Flag, Home, UserCircle, RefreshCw } from "lucide-react";
 
-const supabase = createClient("https://lozjlsffopmyyrstasxe.supabase.co", "sb_publishable_G28jQNSBzQj0GMXu6LkTPg_YdEcyMhV");
+const supabase = createClient("https://kasnukztvipaxtqniktj.supabase.co", "sb_publishable_fcvOMSaKVJGMEXgUqB7CFg_NbwaLVJ0");
 const ADMIN_EMAIL = "kushalkvofmkbsgindiaoyms@gmail.com";
 const PORTAL = "oyms_sankalp_4";
 const SCHOOL = "PM SHRI Kendriya Vidyalaya, Ordnance Factory, Medak";
