@@ -25,13 +25,21 @@ export default function Portal(){
   const [notifications,setNotifications] = useState([]);
   const [audit,setAudit] = useState([]);
   const [mobileMenu,setMobileMenu] = useState(false);
-  const [leaderForm,setLeaderForm] = useState({login_id:"",full_name:"",patrol_name:"Panther",mobile_number:"",password:""});
+  const [leaderForm,setLeaderForm] = useState({login_id:"",full_name:"",patrol_name:"",mobile_number:"",password:"",category:"Scout",bsg_uid:""});
   const [recordForm,setRecordForm] = useState({title:"",category:"General",details:""});
   const [noticeForm,setNoticeForm] = useState({title:"",message:""});
   const [filter,setFilter] = useState("all");
   const [currentPassword,setCurrentPassword] = useState("");
   const [newPassword,setNewPassword] = useState("");
   const [confirmPassword,setConfirmPassword] = useState("");
+  const [memberCategory,setMemberCategory] = useState("Scout");
+  const [memberForm,setMemberForm] = useState({first_name:"",middle_name:"",last_name:"",nickname:"",date_of_birth:"",gender:"",blood_group:"",father_name:"",father_occupation:"",mother_name:"",mother_occupation:"",residential_address:"",town_village:"",district:"",state:"Telangana",pin_code:"",primary_contact:"",whatsapp_number:"",alternative_contact:"",emergency_contact:"",emergency_contact_person:"",email:"",bsg_uid_known:false,bsg_uid:""});
+  const [memberPhoto,setMemberPhoto] = useState(null);
+  const [memberRows,setMemberRows] = useState([]);
+  const [memberReason,setMemberReason] = useState({});
+  const [otpMember,setOtpMember] = useState(null);
+  const [otpValue,setOtpValue] = useState("");
+  const [otpSent,setOtpSent] = useState(false);
 
   useEffect(()=>{ supabase.auth.getSession().then(({data})=>{ if(data.session?.user) enterPortal(data.session.user); }); },[]);
 
@@ -163,9 +171,9 @@ export default function Portal(){
 
   const isAdmin=profile?.role==="super_admin";
   const nav=isAdmin?[
-    ["dashboard","Dashboard",Home],["leaders","Patrol Leaders",Users],["submissions","Submissions",ClipboardList],["notifications","Notifications",Bell],["audit","Activity Log",FileText],["profile","My Profile",UserCircle]
+    ["dashboard","Dashboard",Home],["leaders","Patrols",Users],["members","Member Records",ClipboardList],["notifications","Notifications",Bell],["audit","Unfreeze Requests",FileText],["profile","My Profile",UserCircle]
   ]:[
-    ["dashboard","Dashboard",Home],["new","Submit Record",Plus],["submissions","My Submissions",ClipboardList],["notifications","Notifications",Bell],["profile","My Profile",UserCircle]
+    ["profile","My Profile",UserCircle],["dashboard","Dashboard",Home],["new","My Patrol",Plus],["otp","OTP Verification",ShieldCheck],["notifications","Notifications",Bell]
   ];
 
   if(page==="welcome") return <div className="welcome-page">
