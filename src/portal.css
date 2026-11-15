@@ -215,3 +215,18 @@ th{background:#edf5f9;color:#45677f}.status-verified{background:#e8f6ef}
 .workflow-warning{border-left-color:#c58a2e}
 @media(max-width:900px){.workflow-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.workflow-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.verification-facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.workflow-steps{grid-template-columns:1fr 1fr;gap:7px}.workflow-step{min-height:75px;padding:10px 8px 10px 38px}.workflow-step>span{left:8px;top:13px}.verification-card{padding:12px}.verification-card-head{flex-direction:column}.verification-card-actions{align-items:stretch;flex-direction:column}.verification-card-actions>*{width:100%;max-width:none!important}.verification-card-actions .uid-entry{min-width:0}.patrol-progress-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.verification-toolbar{align-items:stretch}.verification-toolbar label{max-width:none}.compact-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* Responsive full-width Sankalp header slideshow: preserve the entire uploaded banner */
+.welcome-header:has(.header-slideshow){display:block;padding:0;background:#fff;border:0}
+.header-slideshow{width:100%;height:auto;aspect-ratio:8/3;max-height:560px;min-height:0;margin:0;border:0;border-radius:0;box-shadow:none;background:#edf7fc}
+.header-slideshow .home-slide-image{width:100%;height:100%;object-fit:contain;object-position:center;background:#edf7fc}
+.header-slideshow .home-slide-shade{padding:clamp(12px,2vw,28px) 5%}
+.slide-order-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.slide-admin-card>div>small{display:block;color:#718096;font-size:10px;margin-top:7px}
+@media(max-width:640px){
+  .header-slideshow{aspect-ratio:8/3;min-height:0}
+  .header-slideshow .home-slide-controls{bottom:6px;padding:0 8px}
+  .header-slideshow .home-slide-controls>button{width:29px;height:29px}
+  .slide-order-actions button{flex:1;min-width:105px}
+}
