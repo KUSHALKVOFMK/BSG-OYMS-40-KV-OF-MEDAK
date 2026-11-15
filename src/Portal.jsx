@@ -51,6 +51,8 @@ export default function Portal(){
   const [audit,setAudit] = useState([]);
   const [mobileMenu,setMobileMenu] = useState(false);
   const [leaderForm,setLeaderForm] = useState({login_id:"",full_name:"",patrol_name:"",mobile_number:"",password:"",category:"Scout",bsg_uid:""});
+  const [showLeaderPassword,setShowLeaderPassword] = useState(false);
+  const [createdLeaderCredentials,setCreatedLeaderCredentials] = useState(null);
   const [recordForm,setRecordForm] = useState({title:"",category:"General",details:""});
   const [noticeForm,setNoticeForm] = useState({title:"",message:""});
   const [filter,setFilter] = useState("all");
@@ -109,8 +111,9 @@ export default function Portal(){
       const {data:photoData}=await supabase.storage.from("member-photos").createSignedUrl(p.profile_photo_path,3600);
       setProfilePhotoUrl(photoData?.signedUrl||"");
     }else setProfilePhotoUrl("");
-    await checkFirstLoginAnnouncement(authUser.id);
     if(p.role==="patrol_leader" && !p.profile_completed_at){setTab("profile-setup");return;}
+    if(p.role==="patrol_leader" && p.must_change_password){setTab("profile");setMessage("For account security, change your temporary password before opening your dashboard.");return;}
+    await checkFirstLoginAnnouncement(authUser.id);
     setTab("dashboard");
     await refreshData(p.role,authUser.id);
   }
@@ -199,6 +202,7 @@ export default function Portal(){
     setProfile(data);setMemberPhoto(null);setProfilePhoto(null);
     const {data:photoData}=await supabase.storage.from("member-photos").createSignedUrl(photoPath,3600);
     setProfilePhotoUrl(photoData?.signedUrl||"");
+    if(data.must_change_password){setMessage("Your profile is saved. Please change the temporary password to continue.");setTab("profile");return;}
     setMessage("Your profile is complete. Patrol member registration is now open.");
     setTab("dashboard");
     await refreshData("patrol_leader",user.id);
@@ -223,12 +227,18 @@ export default function Portal(){
     if(newPassword!==confirmPassword){setMessage("New password and confirmation do not match.");return;}
     setLoading(true);
     const {error}=await supabase.auth.updateUser({password:newPassword,data:{password_initialized:true}});
+    if(error){setLoading(false);setMessage(error.message);return;}
+    if(profile?.role==="patrol_leader" && profile.must_change_password){
+      const {error:profileError}=await supabase.from("profiles").update({must_change_password:false}).eq("id",user.id);
+      if(profileError){setLoading(false);setMessage("Password changed, but the first-login security flag could not be cleared. Please contact the Super Admin.");return;}
+      setProfile(current=>({...current,must_change_password:false}));
+    }
     setLoading(false);
-    if(error){setMessage(error.message);return;}
     setCurrentPassword("");setNewPassword("");setConfirmPassword("");
     const {data:sessionData}=await supabase.auth.getUser();
     if(sessionData?.user)setUser(sessionData.user);
-    setMessage("Password saved successfully.");
+    if(profile?.role==="patrol_leader" && profile.profile_completed_at){setTab("dashboard");await refreshData("patrol_leader",user.id);setMessage("Password updated. Your Patrol Leader dashboard is now unlocked.");}
+    else setMessage("Password saved successfully.");
   }
 
   async function signIn(e){
@@ -244,13 +254,43 @@ export default function Portal(){
 
   async function signOut(){await supabase.auth.signOut();setUser(null);setProfile(null);setPage("welcome");setLoginType("");setPassword("");setLoginId("");setMessage("");}
 
+  function generateTemporaryPassword(){
+    const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+    const bytes=crypto.getRandomValues(new Uint8Array(16));
+    const random=Array.from(bytes,b=>chars[b%chars.length]).join("");
+    setLeaderForm(current=>({...current,password:random+"!7a"}));
+    setShowLeaderPassword(true);
+  }
+  async function copyLeaderCredentials(details){
+    const textValue="OYMS Sankalp 4.0 Patrol Login\\nLogin ID: "+details.login_id+"\\nTemporary password: "+details.password+"\\nLogin URL: "+window.location.origin+window.location.pathname;
+    try{await navigator.clipboard.writeText(textValue);setMessage("Login details copied. Share them privately with the Patrol Leader.");}
+    catch{setMessage("Copy is unavailable in this browser. Select and copy the login details shown on screen.");}
+  }
+  async function resetLeaderPassword(row){
+    const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+    const bytes=crypto.getRandomValues(new Uint8Array(18));
+    const temporaryPassword=Array.from(bytes,b=>chars[b%chars.length]).join("")+"!7a";
+    if(!window.confirm("Generate a new temporary password for "+row.full_name+" ("+row.login_id+")? Their next login will require a password change."))return;
+    setLoading(true);setMessage("");
+    const {data,error}=await supabase.functions.invoke("reset-patrol-password",{body:{user_id:row.user_id,password:temporaryPassword}});
+    setLoading(false);
+    if(error||data?.error){setMessage(data?.error||error.message);return;}
+    setCreatedLeaderCredentials({login_id:row.login_id,password:temporaryPassword,full_name:row.full_name,patrol_name:row.patrol_name});
+    setMessage("Temporary password reset. Copy the details below and share them privately.");
+    await refreshData("super_admin",user.id);
+  }
   async function createLeader(e){
     e.preventDefault(); setLoading(true); setMessage("");
-    const {data,error}=await supabase.functions.invoke("create-patrol-account",{body:leaderForm});
+    const clean={...leaderForm,login_id:leaderForm.login_id.trim().toLowerCase(),full_name:leaderForm.full_name.trim(),patrol_name:leaderForm.patrol_name.trim(),mobile_number:leaderForm.mobile_number.trim()};
+    if(!/^[a-z0-9._-]{3,30}$/.test(clean.login_id)){setLoading(false);setMessage("Login ID must be 3–30 letters, numbers, dots, underscores or hyphens.");return;}
+    if(clean.password.length<12){setLoading(false);setMessage("Use a temporary password of at least 12 characters.");return;}
+    const {data,error}=await supabase.functions.invoke("create-patrol-account",{body:clean});
     setLoading(false);
     if(error || data?.error){setMessage(data?.error || error.message);return;}
-    setMessage("Patrol Leader account created successfully. Share the Login ID securely with the leader.");
+    setCreatedLeaderCredentials({login_id:clean.login_id,password:clean.password,full_name:clean.full_name,patrol_name:clean.patrol_name});
+    setMessage("Patrol Leader account created. Copy the temporary login details below and share them privately.");
     setLeaderForm({login_id:"",full_name:"",patrol_name:"",mobile_number:"",password:"",category:"Scout",bsg_uid:""});
+    setShowLeaderPassword(false);
     await refreshData("super_admin",user.id);
   }
 
@@ -483,10 +523,14 @@ export default function Portal(){
   const dataCategoryCounts=["Scouts","Guides","Cubs","Bulbuls"].map(category=>({category,count:memberRows.filter(row=>categoryKey(row.category||leaders.find(x=>x.user_id===row.patrol_leader_id)?.category||"")===category).length}));
   const dataVerifiedCount=memberRows.filter(x=>x.review_status==="verified"||x.final_status==="approved").length;
   const dataPendingCount=memberRows.filter(x=>x.submission_status==="completed"&&x.review_status==="pending").length;
-  const nav=isAdmin?[
-    ["dashboard","Dashboard",Home],["leaders","Patrols",Users],["members","Records",ClipboardList],["data-management","Member Data Management",ClipboardList],["submissions","Submissions",FileText],["archive","Left Members Archive",Archive],["member-verification","Member Verification",ShieldCheck],["oms-verification","Final OYMS Verification",CheckCircle2],["slides","Website Slides",FileText],["launch","Launch Updates",Megaphone],["notifications","Notifications",Bell],["audit","Unfreeze Requests",FileText],["profile","My Profile",UserCircle]
+  const nav=profile?.role==="patrol_leader"&&!profile.profile_completed_at?[
+    ["profile-setup","Complete Profile",UserCircle]
+  ]:profile?.role==="patrol_leader"&&profile.must_change_password?[
+    ["profile","Change Password",LockKeyhole]
+  ]:isAdmin?[
+    ["dashboard","Dashboard",Home],["leaders","Patrols & Login Accounts",Users],["members","Records",ClipboardList],["data-management","Member Data Management",ClipboardList],["submissions","Submissions",FileText],["archive","Left Members Archive",Archive],["member-verification","Member Verification",ShieldCheck],["oms-verification","Final OYMS Verification",CheckCircle2],["slides","Website Slides",FileText],["launch","Launch Updates",Megaphone],["notifications","Notifications",Bell],["audit","Unfreeze Requests",FileText],["profile","My Profile",UserCircle]
   ]:profile?.profile_completed_at?[
-    ["profile","My Profile",UserCircle],["dashboard","Dashboard",Home],["new","My Patrol",Plus],["members","Records",ClipboardList],["member-verification","Member Verification",ShieldCheck],["oms-verification","Final OYMS Verification",CheckCircle2],["notifications","Notifications",Bell]
+    ["dashboard","Dashboard",Home],["new","My Patrol",Plus],["members","Records",ClipboardList],["member-verification","Member Verification",ShieldCheck],["oms-verification","Final OYMS Verification",CheckCircle2],["notifications","Notifications",Bell],["profile","My Profile",UserCircle]
   ]:[["profile-setup","Complete Profile",UserCircle]];
 
   if(page==="welcome") return <div className="welcome-page">
