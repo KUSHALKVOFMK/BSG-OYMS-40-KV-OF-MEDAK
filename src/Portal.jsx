@@ -12,6 +12,7 @@ const DIVISION = "KVS Hyderabad Division";
 const isValidEmailFormat = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test((value||"").trim());
 const statusLabel = (s) => ({pending:"Pending",verified:"Verified",needs_changes:"Needs Changes",completed:"Completed"}[s] || s);
 const dateLabel = (d) => d ? new Date(d).toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"}) : "—";
+const categoryKey = (value) => { const v=String(value||"").trim().toLowerCase(); if(v.includes("scout")) return "Scouts"; if(v.includes("guide")) return "Guides"; if(v.includes("bulbul")) return "Bulbuls"; if(v.includes("cub")) return "Cubs"; return ""; };
 
 export default function Portal(){
   const [page,setPage] = useState("welcome");
@@ -54,6 +55,9 @@ export default function Portal(){
   const [memberCategory,setMemberCategory] = useState("Scout");
   const [leaderSearch,setLeaderSearch] = useState("");
   const [memberSearch,setMemberSearch] = useState("");
+  const [dataSearch,setDataSearch] = useState("");
+  const [dataCategory,setDataCategory] = useState("all");
+  const [dataPatrol,setDataPatrol] = useState("all");
   const [noticeRecipient,setNoticeRecipient] = useState("all");
   const [memberForm,setMemberForm] = useState({first_name:"",middle_name:"",last_name:"",nickname:"",date_of_birth:"",gender:"",blood_group:"",father_name:"",father_occupation:"",mother_name:"",mother_occupation:"",residential_address:"",town_village:"",district:"",state:"Telangana",pin_code:"",primary_contact:"",whatsapp_number:"",alternative_contact:"",emergency_contact:"",emergency_contact_person:"",email:"",patrol_position:"Patrol Member",bsg_uid_known:false,bsg_uid:""});
   const [memberPhoto,setMemberPhoto] = useState(null);
