@@ -121,7 +121,7 @@ export default function Portal(){
     const {data:seen}=await supabase.from("portal_announcement_views").select("announcement_id").eq("user_id",userId).in("announcement_id",ids);
     const viewed=new Set((seen||[]).map(x=>x.announcement_id));
     const next=items.find(x=>!viewed.has(x.id));
-    if(next){setActiveAnnouncement({...next,media_url:next.media_path?supabase.storage.from("portal-announcements").getPublicUrl(next.media_path).data.publicUrl:null});}
+    if(next){await openAnnouncement({...next,media_url:next.media_path?supabase.storage.from("portal-announcements").getPublicUrl(next.media_path).data.publicUrl:null});}
   }
   async function publishLaunchAnnouncement(e){
     e.preventDefault();if(!launchTitle.trim()||!launchDescription.trim()||!launchSchedule){setMessage("Enter the launch title, description and scheduled date/time.");return;}
