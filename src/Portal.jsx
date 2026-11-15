@@ -81,7 +81,7 @@ export default function Portal(){
 
   useEffect(()=>{ supabase.auth.getSession().then(({data})=>{ if(data.session?.user) enterPortal(data.session.user); }); },[]);
   useEffect(()=>{try{if(rememberLoginId){localStorage.setItem("oyms4_remember_login","true");if(loginId.trim())localStorage.setItem("oyms4_saved_login_id",loginId.trim());}else{localStorage.removeItem("oyms4_remember_login");localStorage.removeItem("oyms4_saved_login_id");}}catch{}},[rememberLoginId,loginId]);
-  useEffect(()=>{ if(page!=="welcome" || liveHomepageSlides.length<2) return; const timer=setInterval(()=>setWelcomeSlide(v=>(v+1)%liveHomepageSlides.length),7000); return ()=>clearInterval(timer); },[page,liveHomepageSlides.length]);
+  useEffect(()=>{ if(page!=="welcome") return; const timer=setInterval(()=>setWelcomeSlide(v=>liveHomepageSlides.length>1?(v+1)%liveHomepageSlides.length:v),7000); return ()=>clearInterval(timer); },[page,liveHomepageSlides.length]);
   useEffect(()=>{ loadPublicNotices(); loadHomepageSlides(); },[]);
   useEffect(()=>{if(profile?.role==="super_admin"&&tab==="launch")loadLaunchAnnouncements();},[profile?.role,tab]);
   async function loadPublicNotices(){const {data,error}=await supabase.from("notices").select("*").eq("is_published",true).order("published_on",{ascending:false}).limit(6);if(!error&&data)setPublicNotices(data);}
@@ -366,7 +366,7 @@ export default function Portal(){
 
   async function uploadHomepageSlide(e){
     e.preventDefault(); if(!slideFile){setMessage("Choose a slide image first.");return;}
-    if(!["image/jpeg","image/png","image/webp"].includes(slideFile.type)){setMessage("Use JPG, PNG or WebP images.");return;}
+    if(!["image/jpeg","image/png","image/webp"].includes(slideFile.type)){setMessage("Use JPG, PNG or WebP images.");return;}if(slideEndAt&&(!Number.isFinite(new Date(slideEndAt).getTime())||new Date(slideEndAt).getTime()<=Date.now())){setMessage("Choose an end date and time in the future.");return;}
     if(slideFile.size>50*1024*1024){setMessage("Original slide image must be 50 MB or smaller.");return;}
     setLoading(true);setMessage("");
     let uploadFile;
