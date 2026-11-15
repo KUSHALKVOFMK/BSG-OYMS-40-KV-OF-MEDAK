@@ -379,8 +379,9 @@ export default function Portal(){
       context.imageSmoothingEnabled=true;context.imageSmoothingQuality="high";
       context.drawImage(bitmap,0,0,canvas.width,canvas.height);
       const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error("Could not resize this image.")),"image/jpeg",0.84));
-      uploadFile=new File([blob],slideFile.name.replace(/\\.[^.]+$/,"")+".jpg",{type:"image/jpeg"});
+      uploadFile=new File([blob],slideFile.name.replace(/\.[^.]+$/,"")+".jpg",{type:"image/jpeg"});
       bitmap.close();
+      if(uploadFile.size>10*1024*1024)throw new Error("The resized image is still above the 10 MB shared storage limit. Please choose another image.");
     }catch(error){
       setLoading(false);setMessage("The slide image could not be resized. Please choose another JPG, PNG or WebP image. "+(error?.message||""));return;
     }
