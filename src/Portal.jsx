@@ -450,6 +450,23 @@ export default function Portal(){
       </section>
       <section className="portal-login-strip"><div><span className="eyebrow">AUTHORISED ACCESS</span><h2>Portal Login</h2><p>Sign in to access your assigned portal services.</p></div><button className="primary large" onClick={()=>{setPage("choose");setMessage("");}}>PORTAL LOGIN <ArrowRight size={18}/></button></section>
       <section className="portal-services"><div className="public-notices-heading"><div><span className="eyebrow">SANKALP 4.0</span><h3>Portal Services</h3></div></div><div className="service-grid"><article><Users/><b>Patrol Management</b><p>Manage patrol leader accounts and unit records.</p></article><article><ClipboardList/><b>Member Records</b><p>Submit, review and maintain member information.</p></article><article><ShieldCheck/><b>Verification</b><p>Follow the administrative review and approval process.</p></article><article><Bell/><b>Notices & Updates</b><p>Read official public notices and portal notifications.</p></article></div></section>
+      <section className="public-bsg-overview" id="about-bsg">
+        <div className="public-notices-heading"><div><span className="eyebrow">BHARAT SCOUTS & GUIDES</span><h3>Learn, Lead and Serve</h3></div><span className="public-notice-tag">KVS · 2026–27</span></div>
+        <p className="public-bsg-intro">The Bharat Scouts & Guides movement encourages young people to develop character, responsibility, teamwork, leadership and service to the community through learning by doing.</p>
+        <div className="public-section-grid">
+          <article id="scouts"><Flag/><b>Scouts</b><p>Outdoor learning, teamwork, practical skills and community service.</p></article>
+          <article id="guides"><ShieldCheck/><b>Guides</b><p>Leadership, confidence, cooperation and service through activities.</p></article>
+          <article id="cubs"><Users/><b>Cubs</b><p>Age-appropriate discovery, games, friendship and learning together.</p></article>
+          <article id="bulbuls"><Users/><b>Bulbuls</b><p>Creative activities, confidence, kindness and joyful learning.</p></article>
+        </div>
+        <div className="public-info-grid">
+          <article><b>Group & Unit Details</b><p>School unit information and section details will be published here.</p></article>
+          <article><b>Leader Details</b><p>Authorised leader information will be published by the Super Admin.</p></article>
+          <article><b>Activities & Achievements</b><p>Reports of camps, service activities and achievements will appear here.</p></article>
+          <article><b>Photographs & Gallery</b><p>Approved school activity photographs will be displayed in the website gallery.</p></article>
+          <article><b>Official Circulars</b><p>Public circulars and notices published by the Super Admin are shown below.</p></article>
+        </div>
+      </section>
       <section className="public-notices"><div className="public-notices-heading"><div><span className="eyebrow">OFFICIAL UPDATES</span><h3>Public Notices</h3></div><span className="public-notice-tag">SANKALP 4.0</span></div>{publicNotices.map(n=><article className="public-notice-row" key={n.id}><div className="notice-date">{n.published_on?new Date(n.published_on+"T00:00:00").toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}):"Notice"}</div><div><b>{n.title}</b>{n.body&&<p>{n.body}</p>}</div></article>)}{!publicNotices.length&&<p className="empty">No public notices have been published yet.</p>}</section>
       <footer className="welcome-footer">PM SHRI Kendriya Vidyalaya, Ordnance Factory, Medak · Eddumailaram · KVS Hyderabad Division<span>OYMS SANKALP 4.0 · 2026–27</span></footer>
     </main>
