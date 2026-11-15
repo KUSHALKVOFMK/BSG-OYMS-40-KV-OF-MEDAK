@@ -258,3 +258,14 @@ create policy "staff review registration" on public.registration_requests for al
 
 -- Added for the annual BSG member registration form (migration 202611150001).
 alter table public.member_records add column if not exists urn_number text not null default '';
+
+
+-- Current OYMS 4.0 live extensions (migrations 202611150001 and 202611150002).
+alter table public.member_records add column if not exists urn_number text not null default '';
+alter table public.profiles drop constraint if exists profiles_category_check;
+alter table public.profiles add constraint profiles_category_check check (category is null or category in ('Scout','Guide','Cub','Bulbul'));
+alter table public.member_records drop constraint if exists member_records_category_check;
+alter table public.member_records add constraint member_records_category_check check (category in ('Scout','Guide','Cub','Bulbul'));
+alter table public.member_records drop constraint if exists member_records_oms_status_check;
+update public.member_records set oms_status='completed' where oms_status='updated';
+alter table public.member_records add constraint member_records_oms_status_check check (oms_status in ('not_updated','in_progress','completed'));
