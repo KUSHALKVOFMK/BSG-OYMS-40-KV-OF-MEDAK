@@ -162,6 +162,15 @@ function App(){
   },[]);
   useEffect(()=>{
     if(!supabase)return;
+    let active=true;
+    supabase.from('events').select('*').in('status',['published','Published','upcoming','active']).order('event_date',{ascending:true}).limit(100).then(({data:rows,error})=>{
+      if(!active||error||!rows)return;
+      setData(prev=>({...prev,events:[...rows,...prev.events.filter(e=>!rows.some(r=>r.id===e.id))]}));
+    });
+    return ()=>{active=false;};
+  },[]);
+  useEffect(()=>{
+    if(!supabase)return;
     supabase.auth.getSession().then(async ({data:s})=>{
       if(s.session) await loadProfile(s.session.user);
     });
