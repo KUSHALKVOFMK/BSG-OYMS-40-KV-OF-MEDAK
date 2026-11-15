@@ -223,7 +223,7 @@ export default function Portal(){
       const {error:verifyError}=await supabase.auth.signInWithPassword({email:user.email,password:currentPassword});
       if(verifyError){setMessage("Current password is incorrect.");return;}
     }
-    if(newPassword.length<10){setMessage("Choose a password with at least 10 characters.");return;}
+    if(newPassword.length<12){setMessage("Choose a password with at least 12 characters.");return;}
     if(newPassword!==confirmPassword){setMessage("New password and confirmation do not match.");return;}
     setLoading(true);
     const {error}=await supabase.auth.updateUser({password:newPassword,data:{password_initialized:true}});
@@ -258,7 +258,7 @@ export default function Portal(){
     const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
     const bytes=crypto.getRandomValues(new Uint8Array(16));
     const random=Array.from(bytes,b=>chars[b%chars.length]).join("");
-    setLeaderForm(current=>({...current,password:random+"!7a"}));
+    setLeaderForm(current=>({...current,password:"A"+random+"!7a"}));
     setShowLeaderPassword(true);
   }
   async function copyLeaderCredentials(details){
@@ -269,7 +269,7 @@ export default function Portal(){
   async function resetLeaderPassword(row){
     const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
     const bytes=crypto.getRandomValues(new Uint8Array(18));
-    const temporaryPassword=Array.from(bytes,b=>chars[b%chars.length]).join("")+"!7a";
+    const temporaryPassword="A"+Array.from(bytes,b=>chars[b%chars.length]).join("")+"!7a";
     if(!window.confirm("Generate a new temporary password for "+row.full_name+" ("+row.login_id+")? Their next login will require a password change."))return;
     setLoading(true);setMessage("");
     const {data,error}=await supabase.functions.invoke("reset-patrol-password",{body:{user_id:row.user_id,password:temporaryPassword}});
