@@ -58,3 +58,43 @@
 .public-notice-row{display:grid;grid-template-columns:105px 1fr;gap:15px;padding:13px 0;border-bottom:1px solid #f0f1f5}
 .public-notice-row:last-of-type{border-bottom:0}.notice-date{font-size:10px;color:#7b8495;font-weight:700;padding-top:2px}.public-notice-row b{font-size:12px;color:#29365b}.public-notice-row p{font-size:11px;color:#68758b;line-height:1.6;margin:5px 0 0;white-space:pre-wrap}.public-notice-help{font-size:11px;color:#748096;margin:0}
 @media(max-width:520px){.public-notices{padding:14px}.public-notice-row{grid-template-columns:1fr;gap:4px}}
+
+
+/* SANKALP 4.0 bright, clean school portal refresh */
+:root{color:#26344b;background:#f6f9fc;--navy:#214d78;--purple:#367ca2;--gold:#e6bd63;--line:#dce7ef;--muted:#718196}
+.top-ribbon{background:#174a70}
+.welcome-header{background:linear-gradient(110deg,#eaf6fb,#d8edf6);color:#174a70;border-bottom:4px solid #e6bd63}
+.welcome-header small{color:#4e7188}
+.crest,.mini-crest{color:#17618a;border-color:#e6bd63}
+.welcome-content{max-width:1320px}
+.welcome-header h1{color:#174a70}
+.home-slideshow{position:relative;height:clamp(230px,36vw,460px);overflow:hidden;border-radius:14px;background:linear-gradient(130deg,#e7f4fa,#f7fbfd);border:1px solid #d9e8f0;box-shadow:0 14px 38px #1d4c7012}
+.home-slide-image{width:100%;height:100%;object-fit:cover;display:block}
+.home-slide-shade{position:absolute;inset:auto 0 0;padding:30px 5%;color:#fff;background:linear-gradient(0deg,#102e49c9,transparent)}
+.home-slide-shade h2{font:800 clamp(22px,3vw,36px) Manrope;margin:0 0 7px}.home-slide-shade p{font-size:14px;margin:0}
+.home-slide-empty{height:100%;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:36px 7%;background:radial-gradient(circle at 80% 20%,#d7edf7,transparent 42%),linear-gradient(120deg,#fff,#f0f8fc)}
+.home-slide-empty h2{font:800 clamp(25px,3.5vw,40px) Manrope;color:#194e72;max-width:650px;margin:12px 0}.home-slide-empty p{color:#6b8193}
+.home-slide-controls{position:absolute;left:0;right:0;bottom:14px;display:flex;align-items:center;justify-content:space-between;padding:0 18px}
+.home-slide-controls>button{width:36px;height:36px;border:0;border-radius:50%;background:#fff;color:#1e577d;font-size:24px;box-shadow:0 4px 15px #102e4922}
+.home-slide-controls>div{display:flex;gap:7px}.home-slide-controls>div button{width:9px;height:9px;border:0;border-radius:10px;background:#ffffffa8;padding:0}.home-slide-controls>div button.active{width:24px;background:#fff}
+.portal-login-strip{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 26px;margin:22px 0;background:linear-gradient(105deg,#fff,#edf7fb);border:1px solid #dceaf1;border-left:5px solid #367ca2;border-radius:12px}
+.portal-login-strip h2{font:800 24px Manrope;color:#1d5276;margin:6px 0}.portal-login-strip p{font-size:12px;color:#708196;margin:0}
+.portal-services{margin:24px 0}.service-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.service-grid article{background:#fff;border:1px solid #deebf1;border-radius:12px;padding:20px;box-shadow:0 7px 22px #244d6810;min-height:145px}.service-grid svg{color:#3982a5;width:25px;height:25px;margin-bottom:12px}.service-grid b{display:block;color:#244e70;font-size:13px}.service-grid p{font-size:11px;line-height:1.6;color:#718196;margin:7px 0 0}
+.welcome-footer{border-color:#dce7ef;color:#708196}
+.primary{background:#26749a;border-radius:7px}.primary:hover{background:#195c80}
+.auth-page{background:linear-gradient(145deg,#eaf5fa,#f7fafc)}.auth-card{border-top-color:#367ca2;border-radius:12px;box-shadow:0 18px 55px #1b526f12}
+.role-choice{border-radius:9px}.role-choice:hover{border-color:#75b1ca;background:#f3fafd}
+.app-layout{background:#f4f8fb}.sidebar{background:linear-gradient(180deg,#174a70,#1e5c7c)}.sidebar nav button.active,.sidebar nav button:hover{background:#ffffff20}
+.app-top{background:#fff}.app-top b,.section-title h2,.panel h3,.panel h2{color:#205778}
+.welcome-banner{background:linear-gradient(110deg,#fff,#eaf5fa);border-left-color:#4d9cbb;border-radius:10px}
+.stat-card,.panel{border-color:#dfeaf0;border-radius:10px;box-shadow:0 5px 18px #1b4b6710}
+.stat-card>svg{color:#3982a5}.stat-card strong{color:#205778}
+th{background:#edf5f9;color:#45677f}.status-verified{background:#e8f6ef}
+.danger-outline{border:1px solid #e6b8b8!important;background:#fff7f7!important;color:#a33d3d!important;padding:6px 9px;font-size:10px}
+.departed-label{display:inline-block;margin:5px 0;padding:3px 7px;border-radius:20px;background:#fff0ee;color:#a4473f;font-size:9px;font-weight:800}
+.slide-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.slide-admin-card{overflow:hidden;border:1px solid #dfeaf0;border-radius:10px;background:#fff}
+.slide-admin-card img{width:100%;height:145px;object-fit:cover;display:block;background:#edf4f8}
+.slide-admin-card>div{padding:13px}.slide-admin-card b{font-size:12px;color:#205778}.slide-admin-card p{font-size:11px;color:#718196}.slide-admin-card button{margin-top:7px}
+@media(max-width:760px){.service-grid{grid-template-columns:1fr 1fr}.portal-login-strip{align-items:flex-start;flex-direction:column}.home-slide-empty{padding:24px}.home-slide-controls{bottom:10px}}
+@media(max-width:480px){.service-grid{grid-template-columns:1fr}.portal-login-strip{padding:18px}.home-slideshow{height:260px}}
