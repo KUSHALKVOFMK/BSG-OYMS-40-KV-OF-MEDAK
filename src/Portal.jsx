@@ -103,10 +103,10 @@ export default function Portal(){
       const {data:photoData}=await supabase.storage.from("member-photos").createSignedUrl(p.profile_photo_path,3600);
       setProfilePhotoUrl(photoData?.signedUrl||"");
     }else setProfilePhotoUrl("");
+    await checkFirstLoginAnnouncement(authUser.id);
     if(p.role==="patrol_leader" && !p.profile_completed_at){setTab("profile-setup");return;}
     setTab("dashboard");
     await refreshData(p.role,authUser.id);
-    await checkFirstLoginAnnouncement(authUser.id);
   }
 
   async function loadLaunchAnnouncements(){
