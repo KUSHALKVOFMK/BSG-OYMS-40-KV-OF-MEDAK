@@ -350,7 +350,7 @@ export default function Portal(){
   }
   async function completeMember(row){
     const {error}=await supabase.from("member_records").update({submission_status:"completed",review_status:"pending",updated_at:new Date().toISOString()}).eq("id",row.id);
-    if(error){setMessage(error.message);return;}setMessage("Member details submitted for Admin review. The Admin has been notified.");await refreshData(profile.role,user.id);
+    if(error){setMessage(error.message);return;}setMemberVerificationView("entered");setTab("member-verification");setMessage("Member moved to the Entered page and submitted for Admin review. The Super Admin has been notified.");await refreshData(profile.role,user.id);
   }
   async function reviewMember(row,status){
     if(!isAdmin){setMessage("Only the Super Admin can review member details.");return;}
