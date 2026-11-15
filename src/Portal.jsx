@@ -15,6 +15,7 @@ const dateLabel = (d) => d ? new Date(d).toLocaleString("en-IN",{dateStyle:"medi
 
 export default function Portal(){
   const [page,setPage] = useState("welcome");
+  const [welcomeSlide,setWelcomeSlide] = useState(0);
   const [loginType,setLoginType] = useState("");
   const [loginId,setLoginId] = useState("");
   const [password,setPassword] = useState("");
@@ -53,6 +54,7 @@ export default function Portal(){
   const [memberReason,setMemberReason] = useState({});
 
   useEffect(()=>{ supabase.auth.getSession().then(({data})=>{ if(data.session?.user) enterPortal(data.session.user); }); },[]);
+  useEffect(()=>{ if(page!=="welcome") return; const timer=setInterval(()=>setWelcomeSlide(v=>(v+1)%2),7000); return ()=>clearInterval(timer); },[page]);
   async function enterPortal(authUser){
     const {data:p,error} = await supabase.from("profiles").select("*").eq("id",authUser.id).maybeSingle();
     if(error || !p || !p.is_active || !["super_admin","patrol_leader"].includes(p.role)){
@@ -291,8 +293,8 @@ export default function Portal(){
   if(page==="welcome") return <div className="welcome-page">
     <div className="top-ribbon"><span>भारत स्काउट्स एवं गाइड्स · BHARAT SCOUTS & GUIDES</span><span>OFFICIAL SCHOOL UNIT PORTAL</span></div>
     <header className="welcome-header"><div className="crest">BSG</div><div><b>BHARAT SCOUTS & GUIDES</b><h1>OYMS SANKALP 4.0</h1><p>{SCHOOL}</p><small>{DIVISION} · EDDUMAILARAM, TELANGANA</small></div><div className="header-mark">2026–27<br/><small>YOUTH MANAGEMENT</small></div></header>
-    <main className="welcome-content"><section className="hero"><div className="hero-copy"><span className="eyebrow">ONLINE YOUTH MANAGEMENT SYSTEM</span><h2>Welcome to<br/><strong>OYMS Sankalp 4.0</strong></h2><p>A unified digital workspace for Scout & Guide patrol records, submissions, verification and unit coordination.</p><button className="primary large" onClick={()=>{setPage("choose");setMessage("");}}>LOGIN <ArrowRight size={18}/></button></div><div className="hero-art"><div className="hero-circle"><Flag size={72}/><span>BE PREPARED</span></div><div className="hero-tag">SERVICE · LEADERSHIP · UNITY</div></div></section>
-    <section className="feature-row"><article><ShieldCheck/><b>Secure Access</b><small>Separate administrator and patrol leader sign-in</small></article><article><ClipboardList/><b>Digital Records</b><small>Submit and track patrol activity records</small></article><article><CheckCircle2/><b>Verification</b><small>Review status and administrator feedback</small></article></section>
+    <main className="welcome-content"><section className={"hero hero-carousel slide-"+welcomeSlide} aria-label="Portal welcome slides"><div className="hero-copy"><span className="eyebrow">{welcomeSlide===0?"ONLINE YOUTH MANAGEMENT SYSTEM":"THE NEXT STEP IN DIGITAL SCOUTING"}</span><h2>{welcomeSlide===0?<>Welcome to<br/><strong>OYMS Sankalp 4.0</strong></>:<>SANKALP 2.0<br/><strong>Coming Soon</strong></>}</h2><p>{welcomeSlide===0?"A modern digital workspace for Scout, Guide, Cub and Bulbul patrol records, submissions, verification and unit coordination.":"A new chapter in connected youth management is on the way. SANKALP 2.0 is planned as the next platform experience."}</p><div className="hero-actions"><button className="primary large" onClick={()=>{setPage("choose");setMessage("");}}>PORTAL LOGIN <ArrowRight size={18}/></button>{welcomeSlide===1&&<span className="launch-note">SOON TO BE LAUNCHED</span>}</div></div><div className="hero-art"><div className="hero-orbit orbit-one"></div><div className="hero-orbit orbit-two"></div><div className="hero-circle"><Flag size={72}/><span>{welcomeSlide===0?"BE PREPARED":"COMING SOON"}</span></div><div className="hero-tag">{welcomeSlide===0?"SERVICE · LEADERSHIP · UNITY":"ONE CONNECTED YOUTH NETWORK"}</div></div><div className="hero-controls"><button aria-label="Previous slide" onClick={()=>setWelcomeSlide(v=>(v+1)%2)}>‹</button><div className="hero-dots"><button aria-label="Show welcome slide" className={welcomeSlide===0?"active":""} onClick={()=>setWelcomeSlide(0)}></button><button aria-label="Show coming soon slide" className={welcomeSlide===1?"active":""} onClick={()=>setWelcomeSlide(1)}></button></div><button aria-label="Next slide" onClick={()=>setWelcomeSlide(v=>(v+1)%2)}>›</button></div></section>
+    <section className="feature-row"><article><ShieldCheck/><b>Secure Access</b><small>Authorised administrator and Patrol Leader access</small></article><article><ClipboardList/><b>Digital Records</b><small>Member details and patrol records in one place</small></article><article><CheckCircle2/><b>Admin Verification</b><small>Profile review, parent-form checks and status tracking</small></article><article><Flag/><b>All BSG Sections</b><small>Scouts, Guides, Cubs and Bulbuls</small></article></section>
     <footer className="welcome-footer">{SCHOOL} · {DIVISION}<span>OYMS SANKALP 4.0 · 2026–27</span></footer></main>
   </div>;
 
