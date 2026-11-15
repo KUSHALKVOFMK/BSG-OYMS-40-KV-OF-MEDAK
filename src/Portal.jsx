@@ -262,7 +262,7 @@ export default function Portal(){
     setShowLeaderPassword(true);
   }
   async function copyLeaderCredentials(details){
-    const textValue="OYMS Sankalp 4.0 Patrol Login\\nLogin ID: "+details.login_id+"\\nTemporary password: "+details.password+"\\nLogin URL: "+window.location.origin+window.location.pathname;
+    const textValue="OYMS Sankalp 4.0 Patrol Login\nLogin ID: "+details.login_id+"\nTemporary password: "+details.password+"\nLogin URL: "+window.location.origin+window.location.pathname;
     try{await navigator.clipboard.writeText(textValue);setMessage("Login details copied. Share them privately with the Patrol Leader.");}
     catch{setMessage("Copy is unavailable in this browser. Select and copy the login details shown on screen.");}
   }
