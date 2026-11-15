@@ -35,6 +35,8 @@ export default function Portal(){
   const [publicNoticeForm,setPublicNoticeForm] = useState({title:"",body:""});
   const [loginType,setLoginType] = useState("");
   const [loginId,setLoginId] = useState("");
+  const [rememberLoginId,setRememberLoginId] = useState(()=>{try{return localStorage.getItem("oyms4_remember_login")==="true";}catch{return false;}});
+  const [savedLoginId,setSavedLoginId] = useState(()=>{try{return localStorage.getItem("oyms4_saved_login_id")||"";}catch{return "";}});
   const [password,setPassword] = useState("");
   const [user,setUser] = useState(null);
   const [profile,setProfile] = useState(null);
@@ -75,6 +77,7 @@ export default function Portal(){
   const [uidDrafts,setUidDrafts] = useState({});
 
   useEffect(()=>{ supabase.auth.getSession().then(({data})=>{ if(data.session?.user) enterPortal(data.session.user); }); },[]);
+  useEffect(()=>{try{if(rememberLoginId){localStorage.setItem("oyms4_remember_login","true");if(loginId.trim())localStorage.setItem("oyms4_saved_login_id",loginId.trim());}else{localStorage.removeItem("oyms4_remember_login");localStorage.removeItem("oyms4_saved_login_id");}}catch{}},[rememberLoginId,loginId]);
   useEffect(()=>{ if(page!=="welcome" || homepageSlides.length<2) return; const timer=setInterval(()=>setWelcomeSlide(v=>(v+1)%homepageSlides.length),7000); return ()=>clearInterval(timer); },[page,homepageSlides.length]);
   useEffect(()=>{ loadPublicNotices(); loadHomepageSlides(); },[]);
   useEffect(()=>{if(profile?.role==="super_admin"&&tab==="launch")loadLaunchAnnouncements();},[profile?.role,tab]);
@@ -232,6 +235,7 @@ export default function Portal(){
     const {data,error}=await supabase.auth.signInWithPassword({email:identity,password});
     setLoading(false);
     if(error){setMessage(error.message);return;}
+    if(rememberLoginId){setSavedLoginId(loginId.trim());}
     await enterPortal(data.user);
   }
 
@@ -305,6 +309,9 @@ export default function Portal(){
     if(error){setMessage(error.message);return;}setMessage("Member details submitted for Admin review. The Admin has been notified.");await refreshData(profile.role,user.id);
   }
   async function reviewMember(row,status){
+    if(!isAdmin){setMessage("Only the Super Admin can review member details.");return;}
+    if(row.submission_status!=="completed"){setMessage("The Patrol Leader must submit this member record for Admin review first.");return;}
+    if(row.is_locked||row.final_status==="approved"){setMessage("This member record is locked. Approve an Unfreeze Request before making changes.");return;}
     const reason=(memberReason[row.id]||"").trim();
     if(status==="disapproved"&&!reason){setMessage("Enter a reason for disapproval.");return;}
     const {error}=await supabase.from("member_records").update({review_status:status,review_reason:status==="disapproved"?reason:"",updated_at:new Date().toISOString()}).eq("id",row.id);
@@ -314,6 +321,10 @@ export default function Portal(){
   }
   async function markOmsUpdated(row,status="completed"){
     if(!isAdmin){setMessage("Only the Super Admin can update final OYMS status.");return;}
+    if(row.review_status!=="verified"||!String(row.bsg_uid||"").trim()){setMessage("Enter the BSG UID and verify member details before starting the official OYMS update.");return;}
+    if(row.is_locked||row.final_status==="approved"){setMessage("This member record is already approved and locked.");return;}
+    if(status==="completed"&&row.oms_status!=="in_progress"){setMessage("First mark the official OYMS update as In Progress. Then mark it Completed when finished.");return;}
+    if(status==="in_progress"&&row.oms_status==="completed"){setMessage("The official OYMS update is already completed.");return;}
     const {error}=await supabase.from("member_records").update({oms_status:status,updated_at:new Date().toISOString()}).eq("id",row.id);
     if(error){setMessage(error.message);return;}
     await supabase.from("member_notifications").insert({recipient_user_id:row.patrol_leader_id,member_record_id:row.id,title:status==="in_progress"?"OYMS update in progress":"OYMS verification completed",message:status==="in_progress"?"The Super Admin has started updating this member profile in the official OYMS.":"The Super Admin has completed the official OYMS profile update."});
@@ -328,7 +339,10 @@ export default function Portal(){
     setMessage("BSG UID saved for "+[row.first_name,row.last_name].filter(Boolean).join(" ")+".");await refreshData(profile.role,user.id);
   }
   async function finalApprove(row){
-    if(row.review_status!=="verified"||row.oms_status!=="completed"){setMessage("Member details review and final OYMS update must be completed before final approval.");return;}
+    if(!isAdmin){setMessage("Only the Super Admin can give final approval.");return;}
+    if(row.review_status!=="verified"||row.oms_status!=="completed"||!String(row.bsg_uid||"").trim()){setMessage("Member UID, Member Verification and official OYMS completion are required before final approval.");return;}
+    if(row.final_status==="approved"||row.is_locked){setMessage("This member record is already approved and locked.");return;}
+    if(!window.confirm("Final approval will lock this member record and assign its BSG Member Login ID. Continue?"))return;
     const {data:approvedMember,error}=await supabase.from("member_records").update({final_status:"approved",is_locked:true}).eq("id",row.id).select("member_login_id").single();
     if(error){setMessage(error.message);return;}
     const assignedId=approvedMember?.member_login_id||"assigned after database approval";
@@ -427,6 +441,16 @@ export default function Portal(){
   const visibleMemberRows=memberRows.filter(x=>!x.is_departed&&(isAdmin||x.patrol_leader_id===user?.id));
   const archiveRows=isAdmin?memberRows.filter(x=>x.is_departed&&isArchiveDue(x.departed_at)):[];
   const archivePendingCount=archiveRows.length;
+  const workflowIssueCount=memberRows.filter(row=>!row.is_departed&&row.final_status==="approved"&&(row.review_status!=="verified"||row.oms_status!=="completed"||!row.is_locked)).length;
+  const patrolCounts={
+    total:visibleMemberRows.length,
+    submitted:visibleMemberRows.filter(row=>row.submission_status==="completed").length,
+    waiting:visibleMemberRows.filter(row=>row.submission_status==="completed"&&row.review_status==="pending").length,
+    corrections:visibleMemberRows.filter(row=>row.review_status==="disapproved").length,
+    verified:visibleMemberRows.filter(row=>row.review_status==="verified").length,
+    inProgress:visibleMemberRows.filter(row=>row.oms_status==="in_progress").length,
+    completed:visibleMemberRows.filter(row=>row.oms_status==="completed").length
+  };
   const requiredMemberFields=["first_name","middle_name","last_name","nickname","date_of_birth","gender","blood_group","aadhaar_number","urn_number","father_name","father_occupation","mother_name","mother_occupation","residential_address","town_village","district","state","pin_code","primary_contact","whatsapp_number","alternative_contact","emergency_contact","emergency_contact_person","email"];
   const incompleteProfileCount=memberRows.filter(row=>!row.is_departed&&(requiredMemberFields.some(key=>!String(row[key]??"").trim())||!row.photo_path||!(row.form_file_paths||[]).length)).length;
   const dataManagementRows=memberRows.filter(row=>{
@@ -476,10 +500,10 @@ export default function Portal(){
     </main>
   </div>;
 
-  if(page==="choose") return <div className="auth-page"><button className="back" onClick={()=>{setPage("welcome");setMessage("");}}>← Back to Welcome</button><div className="auth-card choose-card"><div className="mini-crest">BSG</div><span className="eyebrow">AUTHORISED PORTAL ACCESS</span><h2>Select Login Type</h2><p>Choose the account type issued to you.</p><button className="role-choice admin-choice" onClick={()=>{setLoginType("admin");setLoginId(ADMIN_EMAIL);setPage("login");setMessage("");}}><span className="choice-icon"><ShieldCheck/></span><span><b>Super Admin Login</b><small>Super Admin access and portal management</small></span><ArrowRight/></button><button className="role-choice patrol-choice" onClick={()=>{setLoginType("patrol");setLoginId("");setPage("login");setMessage("");}}><span className="choice-icon"><Flag/></span><span><b>Patrol Login</b><small>Patrol Leader records and submissions</small></span><ArrowRight/></button><div className="security-line"><LockKeyhole size={15}/> Only authorised accounts can access the portal.</div></div></div>;
+  if(page==="choose") return <div className="auth-page"><button className="back" onClick={()=>{setPage("welcome");setMessage("");}}>← Back to Welcome</button><div className="auth-card choose-card"><div className="mini-crest">BSG</div><span className="eyebrow">AUTHORISED PORTAL ACCESS</span><h2>Select Login Type</h2><p>Choose the account type issued to you.</p><button className="role-choice admin-choice" onClick={()=>{setLoginType("admin");setLoginId(ADMIN_EMAIL);setPage("login");setMessage("");}}><span className="choice-icon"><ShieldCheck/></span><span><b>Super Admin Login</b><small>Super Admin access and portal management</small></span><ArrowRight/></button><button className="role-choice patrol-choice" onClick={()=>{setLoginType("patrol");setLoginId(rememberLoginId?savedLoginId:"");setPage("login");setMessage("");}}><span className="choice-icon"><Flag/></span><span><b>Patrol Login</b><small>Patrol Leader records and submissions</small></span><ArrowRight/></button><div className="security-line"><LockKeyhole size={15}/> Only authorised accounts can access the portal.</div></div></div>;
 
   if(page==="login") return <div className="auth-page"><button className="back" onClick={()=>{setPage("choose");setMessage("");}}>← Back to Login Selection</button><div className="auth-card"><div className="mini-crest">{loginType==="admin"?"SUPER ADMIN":"BSG"}</div><span className="eyebrow">{loginType==="admin"?"SUPER ADMIN ACCESS":"PATROL LEADER ACCESS"}</span><h2>{loginType==="admin"?"Super Admin Login":"Patrol Login"}</h2><p>{loginType==="admin"?"Sign in with the registered administrator email and password.":"Sign in using the Login ID and password created by your Administrator."}</p>
-    <form onSubmit={signIn} className="auth-form"><label>{loginType==="admin"?"Super Admin Email":"Patrol Login ID"}<input required type={loginType==="admin"?"email":"text"} autoComplete="username" value={loginId} onChange={e=>setLoginId(e.target.value)} placeholder={loginType==="admin"?"Super Admin email":"Enter your Login ID"}/></label><label>Password<input required type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Enter your password"/></label><button className="primary block" disabled={loading}>{loading?"Signing in…":"LOGIN SECURELY"} <ArrowRight size={17}/></button></form>
+    <form onSubmit={signIn} className="auth-form"><label>{loginType==="admin"?"Super Admin Email":"Patrol Login ID"}<input required id="oyms-login-id" name="username" type={loginType==="admin"?"email":"text"} autoComplete="username" spellCheck="false" value={loginId} onChange={e=>setLoginId(e.target.value)} placeholder={loginType==="admin"?"Super Admin email":"Enter your Login ID"}/></label><label>Password<input required id="oyms-login-password" name="password" type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Enter your password"/></label><label className="remember-login"><input type="checkbox" checked={rememberLoginId} onChange={e=>setRememberLoginId(e.target.checked)}/><span><b>Remember my Login ID on this device</b><small>Your password is never stored by this portal. Your browser may offer to save it securely.</small></span></label><button className="primary block" disabled={loading}>{loading?"Signing in…":"LOGIN SECURELY"} <ArrowRight size={17}/></button></form>
     {loginType==="admin"&&<><button className="link-button" onClick={async()=>{if(!loginId.trim()){setMessage("Enter your admin email first.");return;}setLoading(true);const {error}=await supabase.auth.resetPasswordForEmail(loginId.trim().toLowerCase());setLoading(false);setMessage(error?error.message:"If this email has an OYMS account, a password reset link has been sent.");}}>Forgot password?</button><button className="link-button" onClick={requestAdminActivation} disabled={loading}>First-time Admin? Send secure activation link</button></>}
     {message&&<div className="notice-message"><AlertCircle size={16}/>{message}</div>}<div className="security-line"><LockKeyhole size={15}/> Your role is checked by the secure database after sign-in.</div></div></div>;
 
