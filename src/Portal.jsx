@@ -141,7 +141,7 @@ export default function Portal(){
     setActiveAnnouncement(item);setAnnouncementOpen(true);
     await supabase.from("portal_announcement_views").upsert({announcement_id:item.id,user_id:user.id},{onConflict:"announcement_id,user_id",ignoreDuplicates:true});
   }
-  function closeAnnouncement(){setAnnouncementOpen(false);setConfettiOn(true);window.setTimeout(()=>setConfettiOn(false),5000);}
+  function closeAnnouncement(){setAnnouncementOpen(false);setActiveAnnouncement(null);setConfettiOn(true);window.setTimeout(()=>setConfettiOn(false),5000);}
   async function refreshData(role,userId){
     setLoading(true);
     if(role==="super_admin"){
