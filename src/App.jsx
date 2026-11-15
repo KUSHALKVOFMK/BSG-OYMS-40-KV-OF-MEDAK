@@ -205,7 +205,8 @@ function App(){
   async function saveRow(key,row){
     const table=TABLES[key];
     if(supabase&&!demoMode){
-      const scopedRow={...row,school_id:row.school_id||user?.profile?.school_id||null};
+      const scopedRow={...row};
+      if(!['events','notices'].includes(table)) scopedRow.school_id=row.school_id||user?.profile?.school_id||null;
       const {data:result,error}=await supabase.from(table).upsert(scopedRow).select().single();
       if(error){setNotice(error.message);return null;}
       setData(prev=>({...prev,[key]:[result,...prev[key].filter(x=>x.id!==result.id)]}));return result;
