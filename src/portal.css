@@ -145,3 +145,11 @@ th{background:#edf5f9;color:#45677f}.status-verified{background:#e8f6ef}
 @keyframes launch-ribbon-dance{0%{transform:translate3d(-22px,-4vh,0) rotate(-24deg) skewY(-8deg)}50%{transform:translate3d(24px,15vh,0) rotate(18deg) skewY(9deg)}100%{transform:translate3d(-8px,32vh,0) rotate(-12deg) skewY(-5deg)}}
 @keyframes launch-celebrate-fall{0%{transform:translate3d(0,-5vh,0) rotate(0deg);opacity:0}10%{opacity:1}100%{transform:translate3d(45px,115vh,0) rotate(900deg);opacity:.9}}
 @media(prefers-reduced-motion:reduce){.launch-ribbons i,.launch-sparkles i,.launch-modal{animation:none!important}}
+
+
+.member-record-table{min-width:2100px}
+.member-record-table th,.member-record-table td{white-space:normal;min-width:115px;vertical-align:top;line-height:1.5}
+.member-record-table th:nth-child(1),.member-record-table th:nth-child(2){min-width:100px}
+.member-record-table th:nth-child(3){min-width:190px}
+.uid-entry{display:grid;gap:7px;min-width:180px}
+.uid-entry input{width:100%;border:1px solid #dce2ec;padding:9px;border-radius:4px}
