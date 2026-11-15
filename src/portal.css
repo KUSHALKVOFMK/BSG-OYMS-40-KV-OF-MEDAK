@@ -129,3 +129,19 @@ th{background:#edf5f9;color:#45677f}.status-verified{background:#e8f6ef}
 .backup-warning{font-size:11px;line-height:1.6;color:#8a5a28;margin:12px 0 0}
 @media(max-width:900px){.data-tools-filters{grid-template-columns:1fr 1fr}.data-category-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.data-tools-filters{grid-template-columns:1fr}.data-tools-filters button{width:100%;min-height:42px}.data-category-stats{grid-template-columns:1fr 1fr}.table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}.table-wrap table{min-width:1050px}.table-wrap th,.table-wrap td{font-size:11px;padding:9px 8px}.app-content{padding:14px}.panel{padding:15px}.section-title{gap:10px;align-items:flex-start}}
+
+
+/* Celebration layer for launch announcements */
+.launch-modal-backdrop{isolation:isolate;overflow:hidden}
+.launch-celebration{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.launch-modal{z-index:2}
+.launch-ribbons,.launch-sparkles{position:absolute;inset:0;overflow:hidden}
+.launch-ribbons i{position:absolute;top:-22%;width:13px;height:46vh;min-height:180px;border-radius:12px;background:linear-gradient(90deg,hsla(var(--ribbon-hue),88%,65%,.12),hsl(var(--ribbon-hue),86%,62%),hsla(var(--ribbon-hue),92%,78%,.75),hsl(var(--ribbon-hue),86%,55%));box-shadow:0 0 12px hsla(var(--ribbon-hue),90%,70%,.3);transform-origin:top center;animation:launch-ribbon-dance 5s ease-in-out infinite alternate}
+.launch-ribbons i:nth-child(2n){width:8px;opacity:.8}
+.launch-ribbons i:nth-child(3n){height:55vh}
+.launch-sparkles i{position:absolute;top:-22px;width:9px;height:15px;border-radius:2px;background:hsl(var(--confetti-hue),88%,62%);box-shadow:0 0 7px hsla(var(--confetti-hue),90%,70%,.55);animation:launch-celebrate-fall 4s linear infinite}
+.launch-sparkles i:nth-child(3n){width:6px;height:18px;border-radius:50%}
+.launch-sparkles i:nth-child(4n){width:12px;height:8px}
+@keyframes launch-ribbon-dance{0%{transform:translate3d(-22px,-4vh,0) rotate(-24deg) skewY(-8deg)}50%{transform:translate3d(24px,15vh,0) rotate(18deg) skewY(9deg)}100%{transform:translate3d(-8px,32vh,0) rotate(-12deg) skewY(-5deg)}}
+@keyframes launch-celebrate-fall{0%{transform:translate3d(0,-5vh,0) rotate(0deg);opacity:0}10%{opacity:1}100%{transform:translate3d(45px,115vh,0) rotate(900deg);opacity:.9}}
+@media(prefers-reduced-motion:reduce){.launch-ribbons i,.launch-sparkles i,.launch-modal{animation:none!important}}
