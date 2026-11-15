@@ -254,3 +254,7 @@ create policy "staff review registration" on public.registration_requests for al
 -- Example (replace UUID/email):
 -- insert into public.profiles(id, full_name, email, role)
 -- values ('AUTH-USER-UUID', 'Portal Administrator', 'admin@example.com', 'super_admin');
+
+
+-- Added for the annual BSG member registration form (migration 202611150001).
+alter table public.member_records add column if not exists urn_number text not null default '';
