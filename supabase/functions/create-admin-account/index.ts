@@ -32,7 +32,9 @@ Deno.serve(async (req: Request) => {
 
     const body = await req.json();
     const fullName = String(body.full_name || "").trim();
+    const contactEmail = String(body.email || "").trim().toLowerCase();
     const startDate = String(body.start_date || "").trim();
+    const renewalDate = String(body.renewal_date || "").trim();
     const loginId = String(body.login_id || "").trim().toLowerCase();
     const password = String(body.password || "");
     if (!fullName || !/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^[a-z0-9._-]{3,30}$/.test(loginId) || password.length < 12)
@@ -54,7 +56,7 @@ Deno.serve(async (req: Request) => {
     const invited = created.data.user;
     const { error: profileError } = await client.from("profiles").insert({
       id: invited.id, user_id: invited.id, full_name: fullName,
-      email: internalEmail, email_address: null, start_date: startDate,
+      email: internalEmail, email_address: contactEmail, start_date: startDate, renewal_date: renewalDate,
       login_id: loginId, role: "admin", is_active: true,
       must_change_password: true, created_by: actorId
     });
