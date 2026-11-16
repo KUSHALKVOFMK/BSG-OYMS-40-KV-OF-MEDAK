@@ -173,3 +173,36 @@ for delete to authenticated using (public.is_staff());
 drop policy if exists "users read own announcement views" on public.portal_announcement_views;
 create policy "super admin reads announcement views" on public.portal_announcement_views
 for select to authenticated using (public.is_super_admin() or user_id=auth.uid());
+
+-- Super Admin may correct unlocked member profile details, but cannot alter locked/approved records.
+drop policy if exists "member records visible to owner or staff" on public.member_records;
+create policy "member records visible to owner or authorised staff"
+on public.member_records for select to authenticated
+using (patrol_leader_id=(select auth.uid()) or public.is_staff() or public.is_super_admin());
+drop policy if exists "owner edit unlocked records or staff review" on public.member_records;
+create policy "owner or administration edit unlocked member records"
+on public.member_records for update to authenticated
+using (
+  ((patrol_leader_id=(select auth.uid())) and public.current_role()='patrol_leader' and is_locked=false)
+  or public.is_staff()
+  or (public.is_super_admin() and is_locked=false and final_status<>'approved')
+)
+with check (
+  ((patrol_leader_id=(select auth.uid())) and public.current_role()='patrol_leader' and is_locked=false)
+  or public.is_staff()
+  or (public.is_super_admin() and is_locked=false and final_status<>'approved')
+);
+
+-- Monthly task schedule and release are controlled by Super Admin.
+drop policy if exists "admin creates membership campaigns" on public.membership_verification_campaigns;
+drop policy if exists "admin updates membership campaigns" on public.membership_verification_campaigns;
+drop policy if exists "super admin creates membership campaigns" on public.membership_verification_campaigns;
+create policy "super admin creates membership campaigns"
+on public.membership_verification_campaigns for insert to authenticated with check (public.is_super_admin());
+drop policy if exists "super admin updates membership campaigns" on public.membership_verification_campaigns;
+create policy "super admin updates membership campaigns"
+on public.membership_verification_campaigns for update to authenticated using (public.is_super_admin()) with check (public.is_super_admin());
+drop policy if exists "super admin reads membership campaigns" on public.membership_verification_campaigns;
+create policy "super admin reads membership campaigns"
+on public.membership_verification_campaigns for select to authenticated
+using (public.is_super_admin() or released=true or public.is_staff());
