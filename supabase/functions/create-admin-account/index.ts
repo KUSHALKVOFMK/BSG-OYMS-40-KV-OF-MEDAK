@@ -34,7 +34,7 @@ Deno.serve(async (req: Request) => {
     const fullName = String(body.full_name || "").trim();
     const email = String(body.email || "").trim().toLowerCase();
     const loginId = String(body.login_id || "").trim().toLowerCase();
-    if (!fullName || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))
+    if (!fullName || !/^[a-z0-9._-]{3,30}$/.test(loginId) || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))
       return respond({ error: "Enter the Admin's full name and a valid email address." }, 400);
 
     const invite = await client.auth.admin.inviteUserByEmail(email, {
