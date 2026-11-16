@@ -38,6 +38,8 @@ Deno.serve(async (req: Request) => {
     if (!fullName || !/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^[a-z0-9._-]{3,30}$/.test(loginId) || password.length < 12)
       return respond({ error: "Enter Admin name, start date, Login ID and password (12+ characters)." }, 400);
 
+    const { data: existingAdmin } = await client.from("profiles").select("id").eq("role", "admin").limit(1).maybeSingle();
+    if (existingAdmin) return respond({ error: "Only one Admin account is allowed. Reactivate the existing account from Admin Accounts instead of creating another." }, 409);
     const { data: existingLogin } = await client.from("profiles").select("id").eq("login_id", loginId).maybeSingle();
     if (existingLogin) return respond({ error: "That Login ID is already in use." }, 409);
     const internalEmail = loginId + "@oyms.local";
