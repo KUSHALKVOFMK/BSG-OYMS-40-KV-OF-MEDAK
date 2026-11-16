@@ -87,10 +87,11 @@ export default function Portal(){
   useEffect(()=>{try{if(rememberLoginId){localStorage.setItem("oyms4_remember_login","true");if(loginId.trim())localStorage.setItem("oyms4_saved_login_id",loginId.trim());}else{localStorage.removeItem("oyms4_remember_login");localStorage.removeItem("oyms4_saved_login_id");}}catch{}},[rememberLoginId,loginId]);
   useEffect(()=>{ if(page!=="welcome") return; const timer=setInterval(()=>setWelcomeSlide(v=>liveHomepageSlides.length>1?(v+1)%liveHomepageSlides.length:v),7000); return ()=>clearInterval(timer); },[page,liveHomepageSlides.length]);
   useEffect(()=>{ loadPublicNotices(); },[]);
-  useEffect(()=>{ if(page!=="welcome") return; loadHomepageSlides(); const refreshSlides=()=>loadHomepageSlides(); window.addEventListener("focus",refreshSlides); const refreshTimer=setInterval(refreshSlides,45000); return ()=>{window.removeEventListener("focus",refreshSlides);clearInterval(refreshTimer);}; },[page]);
+  useEffect(()=>{ loadHomepageSlides(); const refreshSlides=()=>loadHomepageSlides(); window.addEventListener("focus",refreshSlides); const refreshTimer=setInterval(refreshSlides,45000); return ()=>{window.removeEventListener("focus",refreshSlides);clearInterval(refreshTimer);}; },[]);
   useEffect(()=>{if(profile?.role==="super_admin"&&tab==="launch")loadLaunchAnnouncements();},[profile?.role,tab]);
+  useEffect(()=>{if(page!=="app"||!user?.id||!profile?.role)return;const sync=()=>{if(document.visibilityState==="visible")refreshData(profile.role,user.id,true);};const timer=setInterval(sync,10000);window.addEventListener("focus",sync);document.addEventListener("visibilitychange",sync);return()=>{clearInterval(timer);window.removeEventListener("focus",sync);document.removeEventListener("visibilitychange",sync);};},[page,user?.id,profile?.role]);
   async function loadPublicNotices(){const {data,error}=await supabase.from("notices").select("*").eq("is_published",true).order("published_on",{ascending:false}).limit(6);if(!error&&data)setPublicNotices(data);}
-  async function loadHomepageSlides(){const {data,error}=await supabase.from("homepage_slides").select("id,title,subtitle,image_path,sort_order,is_active,expires_at,created_at").eq("is_active",true).order("sort_order",{ascending:true}).order("created_at",{ascending:true});if(error){console.error("Homepage slides could not be loaded:",error);setHomepageSlides([]);setMessage("The homepage slides could not be loaded. Please refresh the page or contact the Super Admin.");return;}const rows=(data||[]).filter(x=>x.image_path).map(x=>{const {data:asset}=supabase.storage.from("homepage-slides").getPublicUrl(x.image_path);return {...x,image_url:asset?.publicUrl?asset.publicUrl+(asset.publicUrl.includes("?")?"&":"?")+"v="+encodeURIComponent(x.created_at||x.id):""};}).filter(x=>x.image_url);setHomepageSlides(rows);setWelcomeSlide(0);setSlideImageError(false);if(!rows.length)console.warn("No active homepage slide records with image paths were returned.");}
+  async function loadHomepageSlides(){const {data,error}=await supabase.from("homepage_slides").select("id,title,subtitle,image_path,sort_order,is_active,expires_at,created_at").eq("is_active",true).order("sort_order",{ascending:true}).order("created_at",{ascending:true});if(error){console.error("Homepage slides could not be loaded:",error);setHomepageSlides([]);setMessage("The homepage slides could not be loaded. Please refresh the page or contact the Super Admin.");return;}const rows=(data||[]).filter(x=>x.image_path).map(x=>{const {data:asset}=supabase.storage.from("homepage-slides").getPublicUrl(x.image_path);return {...x,image_url:asset?.publicUrl?asset.publicUrl+(asset.publicUrl.includes("?")?"&":"?")+"v="+encodeURIComponent(x.created_at||x.id):""};}).filter(x=>x.image_url);setHomepageSlides(rows);setWelcomeSlide(current=>Math.min(current,Math.max(0,rows.length-1)));setSlideImageError(false);if(!rows.length)console.warn("No active homepage slide records with image paths were returned.");}
   async function enterPortal(authUser){
     const {data:p,error} = await supabase.from("profiles").select("*").eq("id",authUser.id).maybeSingle();
     if(error || !p || !p.is_active || !["super_admin","patrol_leader"].includes(p.role)){
@@ -160,8 +161,8 @@ export default function Portal(){
     await supabase.from("portal_announcement_views").upsert({announcement_id:item.id,user_id:user.id},{onConflict:"announcement_id,user_id",ignoreDuplicates:true});
   }
   function closeAnnouncement(){setAnnouncementOpen(false);setActiveAnnouncement(null);setConfettiOn(true);window.setTimeout(()=>setConfettiOn(false),5000);}
-  async function refreshData(role,userId){
-    setLoading(true);
+  async function refreshData(role,userId,silent=false){
+    if(!silent)setLoading(true);
     if(role==="super_admin"){
       const [l,s,n,a,m,u]=await Promise.all([
         supabase.from("profiles").select("*").eq("role","patrol_leader").order("created_at",{ascending:false}),
@@ -183,7 +184,7 @@ export default function Portal(){
       if(s.data)setSubmissions(s.data);if(n.data)setNotifications(n.data);if(m.data)setMemberRows(m.data);if(u.data)setUnfreezeRequests(u.data);
       const err=[s,n,m,u].find(x=>x.error);if(err)setMessage(err.error.message);
     }
-    setLoading(false);
+    if(!silent)setLoading(false);
   }
 
   async function savePatrolProfile(e){
