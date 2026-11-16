@@ -157,3 +157,13 @@ for delete to authenticated using (bucket_id='portal-announcements' and public.i
 
 comment on function public.is_staff() is 'RLS helper for the operational Admin role. Does not include Super Admin.';
 comment on function public.is_super_admin() is 'RLS helper for Super Admin website-management permissions only.';
+
+-- Admin owns legacy member-data operations; Super Admin cannot delete member records.
+drop policy if exists "members staff delete" on public.members;
+create policy "admin deletes legacy member records" on public.members
+for delete to authenticated using (public.is_staff());
+
+-- Announcement view analytics are website-management data.
+drop policy if exists "users read own announcement views" on public.portal_announcement_views;
+create policy "super admin reads announcement views" on public.portal_announcement_views
+for select to authenticated using (public.is_super_admin() or user_id=auth.uid());
