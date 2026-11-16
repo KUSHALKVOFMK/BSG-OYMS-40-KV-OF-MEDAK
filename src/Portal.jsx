@@ -182,7 +182,7 @@ export default function Portal(){
   async function refreshData(role,userId,silent=false){
     if(!silent)setLoading(true);
     if(role==="super_admin"){
-      const {data,error}=await supabase.from("profiles").select("id,full_name,email,email_address,is_active,created_at").eq("role","admin").order("created_at",{ascending:false});
+      const {data,error}=await supabase.from("profiles").select("id,full_name,email,email_address,login_id,start_date,is_active,created_at").eq("role","admin").order("created_at",{ascending:false});
       if(data)setAdminAccounts(data);if(error)setMessage(error.message);
     }
     if(role==="admin"){
