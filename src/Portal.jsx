@@ -163,7 +163,7 @@ export default function Portal(){
   function closeAnnouncement(){setAnnouncementOpen(false);setActiveAnnouncement(null);setConfettiOn(true);window.setTimeout(()=>setConfettiOn(false),5000);}
   async function refreshData(role,userId,silent=false){
     if(!silent)setLoading(true);
-    if(role==="super_admin"){
+    if(role==="super_admin"||role==="admin"){
       const [l,s,n,a,m,u]=await Promise.all([
         supabase.from("profiles").select("*").eq("role","patrol_leader").order("created_at",{ascending:false}),
         supabase.from("patrol_submissions").select("*").order("submitted_at",{ascending:false}),
