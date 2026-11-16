@@ -32,29 +32,29 @@ Deno.serve(async (req: Request) => {
 
     const body = await req.json();
     const fullName = String(body.full_name || "").trim();
-    const email = String(body.email || "").trim().toLowerCase();
+    const startDate = String(body.start_date || "").trim();
     const loginId = String(body.login_id || "").trim().toLowerCase();
-    if (!fullName || !/^[a-z0-9._-]{3,30}$/.test(loginId) || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))
-      return respond({ error: "Enter the Admin's full name and a valid email address." }, 400);
+    const password = String(body.password || "");
+    if (!fullName || !/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^[a-z0-9._-]{3,30}$/.test(loginId) || password.length < 12)
+      return respond({ error: "Enter Admin name, start date, Login ID and password (12+ characters)." }, 400);
 
-    const invite = await client.auth.admin.inviteUserByEmail(email, {
-      data: { full_name: fullName, portal: "oyms_sankalp_4", invited_role: "admin" },
-      redirectTo: "https://pmskvofmk.github.io/BSG-OYMS-40-KV-OF-MEDAK/"
+    const { data: existingLogin } = await client.from("profiles").select("id").eq("login_id", loginId).maybeSingle();
+    if (existingLogin) return respond({ error: "That Login ID is already in use." }, 409);
+    const internalEmail = loginId + "@oyms.local";
+    const created = await client.auth.admin.createUser({
+      email: internalEmail,
+      password,
+      email_confirm: true,
+      user_metadata: { full_name: fullName, portal: "oyms_sankalp_4", password_initialized: false }
     });
-    if (invite.error || !invite.data.user)
-      return respond({ error: invite.error?.message || "Could not send the Admin invitation." }, 400);
-
-    const invited = invite.data.user;
+    if (created.error || !created.data.user)
+      return respond({ error: created.error?.message || "Could not create the Admin account." }, 400);
+    const invited = created.data.user;
     const { error: profileError } = await client.from("profiles").insert({
-      id: invited.id,
-      user_id: invited.id,
-      full_name: fullName,
-      email,
-      email_address: email,
-      login_id: loginId,
-      role: "admin",
-      is_active: true,
-      created_by: actorId
+      id: invited.id, user_id: invited.id, full_name: fullName,
+      email: internalEmail, email_address: null, start_date: startDate,
+      login_id: loginId, role: "admin", is_active: true,
+      must_change_password: true, created_by: actorId
     });
     if (profileError) {
       await client.auth.admin.deleteUser(invited.id);
@@ -62,12 +62,12 @@ Deno.serve(async (req: Request) => {
     }
 
     await client.from("audit_logs").insert({
-      action: "Created Admin account by email invitation",
+      action: "Created Admin account with Login ID and initial password",
       entity_table: "profiles",
       record_id: invited.id,
       actor_id: actorId
     });
-    return respond({ success: true, message: "Admin invitation sent. The Admin must open the email and set a password." });
+    return respond({ success: true, message: "Admin account created. Change the initial password after first login." });
   } catch (error) {
     return respond({ error: error instanceof Error ? error.message : "Unexpected account creation error." }, 400);
   }
