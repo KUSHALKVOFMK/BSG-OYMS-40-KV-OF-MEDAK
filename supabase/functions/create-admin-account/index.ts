@@ -51,6 +51,7 @@ Deno.serve(async (req: Request) => {
       full_name: fullName,
       email,
       email_address: email,
+      login_id: loginId,
       role: "admin",
       is_active: true,
       created_by: actorId
