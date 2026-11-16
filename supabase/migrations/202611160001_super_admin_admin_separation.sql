@@ -206,3 +206,6 @@ drop policy if exists "super admin reads membership campaigns" on public.members
 create policy "super admin reads membership campaigns"
 on public.membership_verification_campaigns for select to authenticated
 using (public.is_super_admin() or released=true or public.is_staff());
+
+
+alter table public.profiles add column if not exists start_date date;
