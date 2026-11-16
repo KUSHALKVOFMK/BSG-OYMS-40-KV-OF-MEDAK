@@ -133,7 +133,7 @@ export default function Portal(){
     if(p.role==="patrol_leader" && !p.profile_completed_at){setTab("profile-setup");return;}
     if(p.role==="patrol_leader" && p.must_change_password){setTab("profile");setMessage("For account security, change your temporary password before opening your dashboard.");return;}
     await checkFirstLoginAnnouncement(authUser.id);
-    if(p.role==="admin" && authUser.user_metadata?.password_initialized!==true){setTab("profile");setMessage("Welcome. Set your password to finish activating your Admin account.");return;}
+    if(["admin","super_admin"].includes(p.role) && authUser.user_metadata?.password_initialized!==true){setTab("profile");setMessage("Welcome. Set your password to finish activating your account.");return;}
     setTab("dashboard");
     await refreshData(p.role,authUser.id);
   }
@@ -266,6 +266,7 @@ export default function Portal(){
     const {data:sessionData}=await supabase.auth.getUser();
     if(sessionData?.user)setUser(sessionData.user);
     if(profile?.role==="patrol_leader" && profile.profile_completed_at){setTab("dashboard");await refreshData("patrol_leader",user.id);setMessage("Password updated. Your Patrol Leader dashboard is now unlocked.");}
+    else if(profile?.role==="admin"||profile?.role==="super_admin"){setTab("dashboard");await refreshData(profile.role,user.id);setMessage("Password saved. Your dashboard is ready.");}
     else setMessage("Password saved successfully.");
   }
 
@@ -625,6 +626,8 @@ export default function Portal(){
     ["profile-setup","Complete Profile",UserCircle]
   ]:profile?.role==="patrol_leader"&&profile.must_change_password?[
     ["profile","Change Password",LockKeyhole]
+  ]:(isSuperAdmin||isAdmin)&&user?.user_metadata?.password_initialized!==true?[
+    ["profile","Set Password",LockKeyhole]
   ]:isSuperAdmin?[
     ["dashboard","Website Dashboard",Home],["admins","Admin Accounts",Users],["slides","Homepage Slides",FileText],["launch","Website Updates",Megaphone],["notifications","Public Notices",Bell],["profile","My Profile",UserCircle]
   ]:isAdmin?[
