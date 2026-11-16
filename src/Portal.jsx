@@ -185,7 +185,10 @@ export default function Portal(){
       const {data,error}=await supabase.from("profiles").select("id,full_name,email,email_address,is_active,created_at").eq("role","admin").order("created_at",{ascending:false});
       if(data)setAdminAccounts(data);if(error)setMessage(error.message);
     }
-    if(role==="admin"||role==="super_admin"){
+    if(role==="super_admin"){
+      const {data:m,error}=await supabase.from("member_records").select("*").order("created_at",{ascending:false});
+      if(m)setMemberRows(m);if(error)setMessage(error.message);
+    }else if(role==="admin"){
       const [l,s,n,a,m,u,h]=await Promise.all([
         supabase.from("profiles").select("*").eq("role","patrol_leader").order("created_at",{ascending:false}),
         supabase.from("patrol_submissions").select("*").order("submitted_at",{ascending:false}),
