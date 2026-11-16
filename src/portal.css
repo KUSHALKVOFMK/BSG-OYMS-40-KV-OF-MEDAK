@@ -274,3 +274,9 @@ th{background:#edf5f9;color:#45677f}.status-verified{background:#e8f6ef}
 .connected-portal-action{display:inline-flex;align-items:center;gap:9px;flex:none;padding:11px 15px;border-radius:9px;color:#fff;background:#225f91;font-size:11px;font-weight:800;transition:background .2s ease}
 .connected-portal-card:hover .connected-portal-action{background:#174a76}
 @media(max-width:600px){.connected-portals{padding:19px;margin:22px 0}.connected-portal-card{align-items:flex-start;flex-wrap:wrap;padding:17px}.connected-portal-copy{flex-basis:calc(100% - 78px)}.connected-portal-action{margin-left:76px}.connected-network-mark{width:43px;height:43px}}
+
+.membership-release-panel{border:1px solid #cfe2f2;background:linear-gradient(125deg,#f2f8ff 0%,#fff 70%,#f3f8ff 100%);box-shadow:0 8px 24px #214e6c0d}
+.membership-release-panel .section-title{align-items:center;gap:18px}
+.membership-release-panel h3{color:#194c78;margin:6px 0}
+.membership-release-status{display:inline-flex;margin-top:8px;padding:6px 10px;border-radius:20px;background:#e6f2fb;color:#27648c;font-size:11px;font-weight:800}
+@media(max-width:650px){.membership-release-panel .section-title{align-items:flex-start;flex-direction:column}.membership-release-panel .section-title>button{width:100%}}
