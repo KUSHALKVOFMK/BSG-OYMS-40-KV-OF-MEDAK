@@ -33,6 +33,7 @@ Deno.serve(async (req: Request) => {
     const body = await req.json();
     const fullName = String(body.full_name || "").trim();
     const email = String(body.email || "").trim().toLowerCase();
+    const loginId = String(body.login_id || "").trim().toLowerCase();
     if (!fullName || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))
       return respond({ error: "Enter the Admin's full name and a valid email address." }, 400);
 
