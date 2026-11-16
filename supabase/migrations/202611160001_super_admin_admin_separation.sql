@@ -16,7 +16,7 @@ returns boolean language sql stable security definer set search_path=public
 as $$ select coalesce(public.current_role()='admin',false) $$;
 
 revoke execute on function public.is_super_admin() from public, anon;
-grant execute on function public.is_super_admin() to authenticated;
+grant execute on function public.is_super_admin() to anon, authenticated;
 revoke execute on function public.is_staff() from public, anon;
 grant execute on function public.is_staff() to authenticated;
 
@@ -121,10 +121,16 @@ create policy "admin updates membership campaigns" on public.membership_verifica
 for update to authenticated using (public.is_staff()) with check (public.is_staff());
 
 -- Patrol Leaders send workflow notifications to Admin, not Super Admin.
+create or replace function public.is_active_admin(target_user uuid)
+returns boolean language sql stable security definer set search_path=public
+as $ select exists(select 1 from public.profiles p where p.id=target_user and p.role='admin' and p.is_active=true) $;
+revoke execute on function public.is_active_admin(uuid) from public, anon;
+grant execute on function public.is_active_admin(uuid) to authenticated;
+
 drop policy if exists "patrol leaders notify super admin about own members" on public.member_notifications;
 create policy "patrol leaders notify admin about own members" on public.member_notifications
 for insert to authenticated with check (
-  exists(select 1 from public.profiles p where p.id=recipient_user_id and p.role='admin' and p.is_active=true)
+  public.is_active_admin(recipient_user_id)
   and (member_record_id is null or exists(
     select 1 from public.member_records m
     where m.id=member_record_id and m.patrol_leader_id=auth.uid()
