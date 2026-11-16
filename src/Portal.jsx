@@ -116,7 +116,7 @@ export default function Portal(){
     }
     if(p.role==="super_admin" && (authUser.email||"").toLowerCase()!==ADMIN_EMAIL){
       await supabase.auth.signOut();
-      setMessage("Use the registered Admin email address.");
+      setMessage("Use the registered Super Admin email address.");
       return;
     }
     if(p.role==="patrol_leader" && !(authUser.email||"").toLowerCase().endsWith("@oyms.local")){
@@ -195,7 +195,7 @@ export default function Portal(){
       ]);
       if(l.data)setLeaders(l.data);if(s.data)setSubmissions(s.data);if(n.data)setNotifications(n.data);if(a.data)setAudit(a.data);if(m.data)setMemberRows(m.data);if(u.data)setUnfreezeRequests(u.data);if(h.data)setMembershipChecks(h.data);
       const err=[l,s,n,a,m,u,h].find(x=>x.error);if(err)setMessage(err.error.message);
-    }else{
+    }else if(role==="patrol_leader"){
       const [s,n,m,u,h]=await Promise.all([
         supabase.from("patrol_submissions").select("*").eq("patrol_leader_id",userId).order("submitted_at",{ascending:false}),
         supabase.from("member_notifications").select("*").eq("recipient_user_id",userId).order("created_at",{ascending:false}),
