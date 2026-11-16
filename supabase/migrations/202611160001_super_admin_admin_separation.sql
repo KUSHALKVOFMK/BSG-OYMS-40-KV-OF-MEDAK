@@ -123,7 +123,7 @@ for update to authenticated using (public.is_staff()) with check (public.is_staf
 -- Patrol Leaders send workflow notifications to Admin, not Super Admin.
 create or replace function public.is_active_admin(target_user uuid)
 returns boolean language sql stable security definer set search_path=public
-as $ select exists(select 1 from public.profiles p where p.id=target_user and p.role='admin' and p.is_active=true) $;
+as $active_admin$ select exists(select 1 from public.profiles p where p.id=target_user and p.role='admin' and p.is_active=true) $active_admin$;
 revoke execute on function public.is_active_admin(uuid) from public, anon;
 grant execute on function public.is_active_admin(uuid) to authenticated;
 
