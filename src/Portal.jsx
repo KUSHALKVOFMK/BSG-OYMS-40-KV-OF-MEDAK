@@ -13,7 +13,8 @@ const isValidEmailFormat = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test((valu
 const statusLabel = (s) => ({pending:"Pending",verified:"Verified",needs_changes:"Needs Changes",completed:"Completed"}[s] || s);
 const dateLabel = (d) => d ? new Date(d).toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"}) : "—";
 const isArchiveDue = (departedAt) => { if(!departedAt) return false; const due=new Date(departedAt); due.setMonth(due.getMonth()+1); return due.getTime()<=Date.now(); };
-const categoryKey = (value) => { const v=String(value||"").trim().toLowerCase(); if(v.includes("scout")) return "Scouts"; if(v.includes("guide")) return "Guides"; if(v.includes("bulbul")) return "Bulbuls"; if(v.includes("cub")) return "Cubs"; return ""; };\nconst isTemporaryLaunchDay = () => new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Kolkata",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date()) === "2026-11-17";
+const categoryKey = (value) => { const v=String(value||"").trim().toLowerCase(); if(v.includes("scout")) return "Scouts"; if(v.includes("guide")) return "Guides"; if(v.includes("bulbul")) return "Bulbuls"; if(v.includes("cub")) return "Cubs"; return ""; };
+const isTemporaryLaunchDay = () => new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Kolkata",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date()) === "2026-11-17";
 
 export default function Portal(){
   const [page,setPage] = useState("welcome");
@@ -34,7 +35,9 @@ export default function Portal(){
   const [launchAnnouncements,setLaunchAnnouncements] = useState([]);
   const [activeAnnouncement,setActiveAnnouncement] = useState(null);
   const [announcementOpen,setAnnouncementOpen] = useState(false);
-  const [confettiOn,setConfettiOn] = useState(false);\n  const [launchCountdownOpen,setLaunchCountdownOpen] = useState(false);\n  const [launchCountdownValue,setLaunchCountdownValue] = useState(10);
+  const [confettiOn,setConfettiOn] = useState(false);
+  const [launchCountdownOpen,setLaunchCountdownOpen] = useState(false);
+  const [launchCountdownValue,setLaunchCountdownValue] = useState(10);
   const [publicNoticeForm,setPublicNoticeForm] = useState({title:"",body:""});
   const [loginType,setLoginType] = useState("");
   const [loginId,setLoginId] = useState("");
@@ -89,7 +92,14 @@ export default function Portal(){
   useEffect(()=>{ loadHomepageSlides(); const refreshSlides=()=>loadHomepageSlides(); window.addEventListener("focus",refreshSlides); const refreshTimer=setInterval(refreshSlides,45000); return ()=>{window.removeEventListener("focus",refreshSlides);clearInterval(refreshTimer);}; },[]);
   useEffect(()=>{if(profile?.role==="super_admin"&&tab==="launch")loadLaunchAnnouncements();},[profile?.role,tab]);
   useEffect(()=>{if(page!=="app"||!user?.id||!profile?.role)return;const sync=()=>{if(document.visibilityState==="visible")refreshData(profile.role,user.id,true);};const timer=setInterval(sync,10000);window.addEventListener("focus",sync);document.addEventListener("visibilitychange",sync);return()=>{clearInterval(timer);window.removeEventListener("focus",sync);document.removeEventListener("visibilitychange",sync);};},[page,user?.id,profile?.role]);
-  function startTemporaryPortalLaunch(){\n    if(!isAdmin || !isTemporaryLaunchDay())return;\n    setMobileMenu(false);setPage("welcome");setWelcomeSlide(0);setLaunchCountdownValue(10);setLaunchCountdownOpen(true);\n    let remaining=10;\n    const interval=window.setInterval(()=>{remaining-=1;setLaunchCountdownValue(remaining);if(remaining<=0)window.clearInterval(interval);},1000);\n    window.setTimeout(()=>{setLaunchCountdownOpen(false);setConfettiOn(true);window.setTimeout(()=>setConfettiOn(false),6000);},10000);\n  }\n  async function loadPublicNotices(){const {data,error}=await supabase.from("notices").select("*").eq("is_published",true).order("published_on",{ascending:false}).limit(6);if(!error&&data)setPublicNotices(data);}
+  function startTemporaryPortalLaunch(){
+    if(!isAdmin || !isTemporaryLaunchDay())return;
+    setMobileMenu(false);setPage("welcome");setWelcomeSlide(0);setLaunchCountdownValue(10);setLaunchCountdownOpen(true);
+    let remaining=10;
+    const interval=window.setInterval(()=>{remaining-=1;setLaunchCountdownValue(remaining);if(remaining<=0)window.clearInterval(interval);},1000);
+    window.setTimeout(()=>{setLaunchCountdownOpen(false);setConfettiOn(true);window.setTimeout(()=>setConfettiOn(false),6000);},10000);
+  }
+  async function loadPublicNotices(){const {data,error}=await supabase.from("notices").select("*").eq("is_published",true).order("published_on",{ascending:false}).limit(6);if(!error&&data)setPublicNotices(data);}
   async function loadHomepageSlides(){const {data,error}=await supabase.from("homepage_slides").select("id,title,subtitle,image_path,sort_order,is_active,expires_at,created_at").eq("is_active",true).order("sort_order",{ascending:true}).order("created_at",{ascending:true});if(error){console.error("Homepage slides could not be loaded:",error);setHomepageSlides([]);setMessage("The homepage slides could not be loaded. Please refresh the page or contact the Super Admin.");return;}const rows=(data||[]).filter(x=>x.image_path).map(x=>{const {data:asset}=supabase.storage.from("homepage-slides").getPublicUrl(x.image_path);return {...x,image_url:asset?.publicUrl?asset.publicUrl+(asset.publicUrl.includes("?")?"&":"?")+"v="+encodeURIComponent(x.created_at||x.id):""};}).filter(x=>x.image_url);setHomepageSlides(rows);setWelcomeSlide(current=>Math.min(current,Math.max(0,rows.length-1)));setSlideImageError(false);if(!rows.length)console.warn("No active homepage slide records with image paths were returned.");}
   async function enterPortal(authUser){
     const {data:p,error} = await supabase.from("profiles").select("*").eq("id",authUser.id).maybeSingle();
@@ -558,7 +568,8 @@ export default function Portal(){
     
     <main className="welcome-content">
       <section className="portal-login-strip"><div><span className="eyebrow">AUTHORISED ACCESS</span><h2>Portal Login</h2><p>Sign in to access your assigned portal services.</p></div><button className="primary large" onClick={()=>{setPage("choose");setMessage("");}}>PORTAL LOGIN <ArrowRight size={18}/></button></section>
-      <section className="portal-services"><div className="public-notices-heading"><div><span className="eyebrow">SANKALP 4.0</span><h3>Portal Services</h3></div></div><div className="service-grid"><article><Users/><b>Patrol Management</b><p>Manage patrol leader accounts and unit records.</p></article><article><ClipboardList/><b>Member Records</b><p>Submit, review and maintain member information.</p></article><article><ShieldCheck/><b>Verification</b><p>Follow the administrative review and approval process.</p></article><article><Bell/><b>Notices & Updates</b><p>Read official public notices and portal notifications.</p></article></div></section>\n      <section className="portal-services connected-portals"><div className="public-notices-heading"><div><span className="eyebrow">CONNECTED SCHOOL PORTALS</span><h3>Explore KVS-OYMS 2.0</h3></div></div><div className="service-grid"><a className="service-link-card" href="https://pmskvofmk.github.io/BSG-OYMS-Portal/" target="_blank" rel="noopener noreferrer"><ExternalLink/><b>Open KVS-OYMS 2.0</b><p>Visit the school activity, BSG sections, units, circulars and events portal.</p><span>Open portal ↗</span></a></div></section>
+      <section className="portal-services"><div className="public-notices-heading"><div><span className="eyebrow">SANKALP 4.0</span><h3>Portal Services</h3></div></div><div className="service-grid"><article><Users/><b>Patrol Management</b><p>Manage patrol leader accounts and unit records.</p></article><article><ClipboardList/><b>Member Records</b><p>Submit, review and maintain member information.</p></article><article><ShieldCheck/><b>Verification</b><p>Follow the administrative review and approval process.</p></article><article><Bell/><b>Notices & Updates</b><p>Read official public notices and portal notifications.</p></article></div></section>
+      <section className="portal-services connected-portals"><div className="public-notices-heading"><div><span className="eyebrow">CONNECTED SCHOOL PORTALS</span><h3>Explore KVS-OYMS 2.0</h3></div></div><div className="service-grid"><a className="service-link-card" href="https://pmskvofmk.github.io/BSG-OYMS-Portal/" target="_blank" rel="noopener noreferrer"><ArrowRight/><b>Open KVS-OYMS 2.0</b><p>Visit the school activity, BSG sections, units, circulars and events portal.</p><span>Open portal ↗</span></a></div></section>
       <section className="public-bsg-overview" id="about-bsg">
         <div className="public-notices-heading"><div><span className="eyebrow">BHARAT SCOUTS & GUIDES</span><h3>Learn, Lead and Serve</h3></div><span className="public-notice-tag">KVS · 2026–27</span></div>
         <p className="public-bsg-intro">The Bharat Scouts & Guides movement encourages young people to develop character, responsibility, teamwork, leadership and service to the community through learning by doing.</p>
