@@ -572,7 +572,7 @@ export default function Portal(){
       <section className="connected-portals" aria-label="Connected school portals">
         <div className="connected-portals-heading">
           <div><span className="eyebrow">CONNECTED SCHOOL PORTALS</span><h3>One School Network. Two Connected Portals.</h3><p>Quick access to the school’s BSG activities and youth management services.</p></div>
-          <span className="connected-network-mark"><Network size={25}/></span>
+          <span className="connected-network-mark"><Users size={25}/></span>
         </div>
         <a className="connected-portal-card" href="https://pmskvofmk.github.io/BSG-OYMS-Portal/" target="_blank" rel="noopener noreferrer">
           <span className="connected-portal-icon"><ShieldCheck size={30}/></span>
