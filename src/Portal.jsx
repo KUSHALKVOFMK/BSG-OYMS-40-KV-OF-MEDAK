@@ -569,7 +569,17 @@ export default function Portal(){
     <main className="welcome-content">
       <section className="portal-login-strip"><div><span className="eyebrow">AUTHORISED ACCESS</span><h2>Portal Login</h2><p>Sign in to access your assigned portal services.</p></div><button className="primary large" onClick={()=>{setPage("choose");setMessage("");}}>PORTAL LOGIN <ArrowRight size={18}/></button></section>
       <section className="portal-services"><div className="public-notices-heading"><div><span className="eyebrow">SANKALP 4.0</span><h3>Portal Services</h3></div></div><div className="service-grid"><article><Users/><b>Patrol Management</b><p>Manage patrol leader accounts and unit records.</p></article><article><ClipboardList/><b>Member Records</b><p>Submit, review and maintain member information.</p></article><article><ShieldCheck/><b>Verification</b><p>Follow the administrative review and approval process.</p></article><article><Bell/><b>Notices & Updates</b><p>Read official public notices and portal notifications.</p></article></div></section>
-      <section className="portal-services connected-portals"><div className="public-notices-heading"><div><span className="eyebrow">CONNECTED SCHOOL PORTALS</span><h3>Explore KVS-OYMS 2.0</h3></div></div><div className="service-grid"><a className="service-link-card" href="https://pmskvofmk.github.io/BSG-OYMS-Portal/" target="_blank" rel="noopener noreferrer"><ArrowRight/><b>Open KVS-OYMS 2.0</b><p>Visit the school activity, BSG sections, units, circulars and events portal.</p><span>Open portal ↗</span></a></div></section>
+      <section className="connected-portals" aria-label="Connected school portals">
+        <div className="connected-portals-heading">
+          <div><span className="eyebrow">CONNECTED SCHOOL PORTALS</span><h3>One School Network. Two Connected Portals.</h3><p>Quick access to the school’s BSG activities and youth management services.</p></div>
+          <span className="connected-network-mark"><Network size={25}/></span>
+        </div>
+        <a className="connected-portal-card" href="https://pmskvofmk.github.io/BSG-OYMS-Portal/" target="_blank" rel="noopener noreferrer">
+          <span className="connected-portal-icon"><ShieldCheck size={30}/></span>
+          <span className="connected-portal-copy"><small>ACTIVITIES · UNITS · CIRCULARS · EVENTS</small><b>KVS-OYMS 2.0</b><span>Explore school activities, BSG sections, unit information, official circulars and events.</span></span>
+          <span className="connected-portal-action">Explore portal <ArrowRight size={17}/></span>
+        </a>
+      </section>
       <section className="public-bsg-overview" id="about-bsg">
         <div className="public-notices-heading"><div><span className="eyebrow">BHARAT SCOUTS & GUIDES</span><h3>Learn, Lead and Serve</h3></div><span className="public-notice-tag">KVS · 2026–27</span></div>
         <p className="public-bsg-intro">The Bharat Scouts & Guides movement encourages young people to develop character, responsibility, teamwork, leadership and service to the community through learning by doing.</p>
