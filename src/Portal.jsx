@@ -267,18 +267,37 @@ export default function Portal(){
     setLoading(true);
     const {error}=await supabase.auth.updateUser({password:newPassword,data:{password_initialized:true}});
     if(error){setLoading(false);setMessage(error.message);return;}
-    if(profile?.role==="patrol_leader" && profile.must_change_password){
-      const {error:profileError}=await supabase.from("profiles").update({must_change_password:false}).eq("id",user.id);
-      if(profileError){setLoading(false);setMessage("Password changed, but the first-login security flag could not be cleared. Please contact the Super Admin.");return;}
-      setProfile(current=>({...current,must_change_password:false}));
+    let refreshedProfile=profile;
+    if(profile?.role==="patrol_leader"){
+      const {data:updatedProfile,error:profileError}=await supabase
+        .from("profiles")
+        .update({must_change_password:false})
+        .eq("id",user.id)
+        .select("*")
+        .single();
+      if(profileError){
+        setLoading(false);
+        setMessage("Password changed, but dashboard access could not be unlocked: "+profileError.message);
+        return;
+      }
+      refreshedProfile=updatedProfile;
+      setProfile(updatedProfile);
     }
     setLoading(false);
     setCurrentPassword("");setNewPassword("");setConfirmPassword("");
     const {data:sessionData}=await supabase.auth.getUser();
     if(sessionData?.user)setUser(sessionData.user);
-    if(profile?.role==="patrol_leader" && profile.profile_completed_at){setTab("dashboard");await refreshData("patrol_leader",user.id);setMessage("Password updated. Your Patrol Leader dashboard is now unlocked.");}
-    else if(profile?.role==="admin"||profile?.role==="super_admin"){setTab("dashboard");await refreshData(profile.role,user.id);setMessage("Password saved. Your dashboard is ready.");}
-    else setMessage("Password saved successfully.");
+    if(refreshedProfile?.role==="patrol_leader" && refreshedProfile.profile_completed_at && !refreshedProfile.must_change_password){
+      setTab("dashboard");
+      await refreshData("patrol_leader",user.id);
+      setMessage("Password updated. Your Patrol Leader dashboard is now unlocked.");
+    }else if(refreshedProfile?.role==="admin"||refreshedProfile?.role==="super_admin"){
+      setTab("dashboard");
+      await refreshData(refreshedProfile.role,user.id);
+      setMessage("Password saved. Your dashboard is ready.");
+    }else{
+      setMessage("Password saved successfully. Complete your profile to open the dashboard.");
+    }
   }
 
   async function signIn(e){
