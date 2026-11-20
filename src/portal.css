@@ -331,3 +331,101 @@ th{background:#edf5f9;color:#45677f}.status-verified{background:#e8f6ef}
 .portal-login-actions .portal-login-admin:hover{background:#1f2f79}
 .portal-login-actions .outline.large{padding:14px 20px;border:1px solid #cbd6e6;border-radius:4px;background:#fff;color:#293b91;font-weight:800;letter-spacing:.4px}
 @media(max-width:650px){.portal-login-strip{align-items:stretch;flex-direction:column}.portal-login-actions{width:100%;display:grid;grid-template-columns:1fr}.portal-login-actions button{width:100%}}
+
+
+/* KVS-inspired visual refinement — preserves the established purple/white SANKALP theme */
+:root{
+  color:#2e2940;background:#f7f5fa;
+  --navy:#321657;--purple:#4b287d;--gold:#e7b94d;
+  --line:#e8e3ee;--muted:#6e6a78;
+}
+.top-ribbon{background:#25123f;color:#fff;border-bottom:1px solid #ffffff24;letter-spacing:.8px}
+.welcome-header{background:linear-gradient(105deg,#4b287d 0%,#321657 100%);color:#fff;border-bottom:4px solid var(--gold)}
+.welcome-header h1{color:#fff}
+.welcome-header small{color:#eee6f7}
+.crest,.mini-crest{color:#4b287d;border-color:var(--gold)}
+.kvs-public-nav{position:relative;z-index:12;display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;padding:0 max(18px,calc((100vw - 1320px)/2));background:#fff;border-bottom:1px solid #e4ddea;box-shadow:0 3px 12px #2b17420a}
+.kvs-public-nav a{display:inline-flex;align-items:center;gap:7px;min-height:48px;padding:0 15px;color:#3e2a58;text-decoration:none;font-size:11px;font-weight:700;border-bottom:3px solid transparent;transition:background .15s,color .15s,border-color .15s}
+.kvs-public-nav a:hover{background:#f7f3fb;color:var(--purple);border-bottom-color:var(--gold)}
+.kvs-public-nav .kvs-nav-login{margin:6px 0 6px 12px;min-height:36px;border:0;border-radius:4px;background:var(--navy);color:#fff}
+.kvs-public-nav .kvs-nav-login:hover{background:var(--purple);color:#fff}
+.welcome-content{max-width:1320px;padding-top:26px}
+.home-slideshow{border-radius:3px;border-color:#e3dce9;box-shadow:0 8px 25px #32165710}
+.home-slide-shade{background:linear-gradient(0deg,#25123fe0,transparent);border-bottom:4px solid var(--gold)}
+.home-slide-controls>button{color:var(--navy)}
+.portal-login-strip{background:linear-gradient(105deg,#fff,#f3eef8);border-color:#e7ddec;border-left-color:var(--purple);border-radius:4px;box-shadow:0 5px 18px #3216570a}
+.portal-login-strip h2,.portal-services h3,.public-notices-heading h3{color:var(--navy)}
+.portal-login-actions .portal-login-admin,.portal-login-actions button.primary{background:var(--navy);box-shadow:0 5px 14px #32165720}
+.portal-login-actions .portal-login-admin:hover,.portal-login-actions button.primary:hover{background:var(--purple)}
+.portal-login-actions .outline.large{color:var(--navy);border-color:#cfc2dc}
+.service-grid article,.public-section-grid article,.public-info-grid article{border-color:#e8e1ef;border-radius:4px;box-shadow:0 4px 14px #32165708}
+.service-grid article svg,.public-section-grid svg{color:var(--purple)}
+.connected-portals{background:linear-gradient(125deg,#f5f0fa,#fff 58%,#f7f3fb);border-color:#e5dced;border-radius:5px}
+.connected-portals-heading h3,.connected-portal-copy b{color:var(--navy)}
+.connected-network-mark{color:var(--purple);background:#f0eaf7;border-color:#e2d7ed}
+.connected-portal-icon{background:linear-gradient(145deg,#321657,#67418d)}
+.connected-portal-action{background:var(--navy);border-radius:4px}
+.connected-portal-card{border-radius:4px;border-color:#e5dced}
+.public-bsg-overview,.public-notices{border-radius:4px;border-color:#e5ddec;box-shadow:0 5px 18px #32165708}
+.public-notice-tag{background:#f1ebf7;color:var(--navy)}
+.welcome-footer{border-color:#e5ddec}
+.auth-page{background:radial-gradient(ellipse at 12% 12%,#eee7f5 0,transparent 38%),radial-gradient(ellipse at 88% 88%,#f2edf7 0,transparent 36%),linear-gradient(135deg,#faf9fc 0%,#f1edf6 100%)}
+.auth-card{border-top-color:var(--purple);border-radius:5px;box-shadow:0 18px 50px #32165714}
+.auth-card>.mini-crest{background:linear-gradient(145deg,#321657,#67418d);color:#fff}
+.auth-card .eyebrow{color:#76539a}
+.auth-form .primary,.auth-form .primary.block{background:var(--navy);box-shadow:0 5px 14px #32165720}
+.auth-form .primary:hover,.auth-form .primary.block:hover{background:var(--purple)}
+.choose-card .role-choice{border-radius:4px}
+.choose-card .choice-icon,.choose-card .patrol-choice .choice-icon{background:#f0eaf7;color:var(--purple)}
+.app-layout{background:#f7f5fa}
+.sidebar{background:linear-gradient(180deg,#321657 0%,#25123f 100%);color:#fff}
+.sidebar nav button.active,.sidebar nav button:hover{background:#4b287d;color:#fff}
+.side-bottom button{color:var(--navy)}
+.app-top{border-bottom-color:#e6dfec;background:#fff}
+.app-top b,.section-title h2,.panel h3,.panel h2{color:var(--navy)}
+.welcome-banner{background:linear-gradient(110deg,#fff,#f1ebf7);border-left-color:var(--purple)}
+.stat-card,.panel{border-color:#e8e2ee;box-shadow:0 4px 16px #32165709}
+.stat-card>svg{color:var(--purple)}
+.stat-card strong{color:var(--navy)}
+th{background:#f4f0f8;color:#51465e}
+.primary,.primary-btn{background:var(--navy)}
+.primary:hover,.primary-btn:hover{background:var(--purple)}
+.outline,.outline-btn{border-color:#dcd2e7;color:var(--navy)}
+.status-verified{background:#e8f6ee}
+.workflow-click-grid>button b,.workflow-summary-grid b{color:var(--navy)}
+.workflow-click-grid>button:hover{border-color:#9a83b8}
+.portal-login-actions .portal-login-admin{background:var(--navy)}
+@media(max-width:760px){
+ .kvs-public-nav{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;padding:0 10px}
+ .kvs-public-nav a{flex:none;padding:0 12px;min-height:44px}
+ .kvs-public-nav .kvs-nav-login{margin:4px 5px}
+}
+@media(prefers-reduced-motion:reduce){.kvs-public-nav a{transition:none}}
+
+/* Admin bulk patrol-login import */
+.bulk-login-import{border-top:3px solid var(--gold)}
+.bulk-login-instructions{padding:13px 15px;margin:10px 0 16px;background:#f4f8fc;border:1px solid #dce5ed;color:#40566b;font-size:12px;line-height:1.7}
+.bulk-file-label{display:grid;gap:8px;font-size:12px;font-weight:700;color:var(--navy);margin:12px 0}
+.bulk-file-label input{padding:11px;border:1px dashed #9bb5ca;background:#f8fbfe;border-radius:4px;max-width:100%}
+.patrol-export-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0 16px}
+.patrol-export-row b{font-size:12px;color:var(--navy)}
+.patrol-export-row button{font-size:11px}
+.bulk-login-import .table-wrap{margin:16px 0}
+@media(max-width:700px){.patrol-export-row{align-items:stretch}.patrol-export-row button{width:100%}}
+
+/* KVS institutional masthead shared with the 2.0 portal */
+.top-ribbon{min-height:38px;height:auto;background:#4b0d78!important;padding:8px 2.2vw!important;font-size:11px;letter-spacing:.25px}
+.welcome-header{background:#fff!important;color:#321657!important;display:grid;grid-template-columns:105px minmax(0,1fr) 100px;gap:18px;padding:14px 2.2vw!important;border-bottom:3px solid #d6a638!important;align-items:center}
+.header-kvs-mark,.header-bsg-mark{width:82px;height:82px;border:2px solid #d6a638;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;color:#4b0d78;font-weight:900;font-size:24px;box-shadow:0 2px 9px #4b0d7810}
+.header-school-name{text-align:center}.header-school-name>b{font-size:12px;letter-spacing:1.5px;color:#4b0d78}.header-school-name h1{font:800 clamp(21px,2.6vw,32px) Manrope,Arial,sans-serif;color:#4b0d78;margin:4px 0}.header-school-name p{font-size:13px;color:#65516f;margin:3px}.header-school-name small{font-size:12px;font-weight:800;color:#4b0d78;letter-spacing:.6px}
+.header-bsg-mark{font-size:44px;color:#19813c;display:flex;flex-direction:column;line-height:1}.header-bsg-mark small{font-size:8px;color:#321657;text-align:center;line-height:1.25;margin-top:4px}
+.kvs-public-nav{background:#4b0d78!important;border-bottom:0!important;display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding:0 1.5vw!important}
+.kvs-public-nav a{color:#fff!important;white-space:nowrap;padding:15px 14px!important;border-right:1px solid #ffffff25;font-size:13px!important}
+.kvs-public-nav a:hover{background:#6815a0!important;color:#fff!important}
+.kvs-public-nav .kvs-nav-login{margin-left:auto;background:#8618bd!important;border-radius:5px 5px 0 0;font-weight:800}
+@media(max-width:700px){.top-ribbon{font-size:9px;gap:8px;flex-wrap:wrap}.ribbon-tools{display:none}.welcome-header{grid-template-columns:52px 1fr 52px;gap:7px;padding:10px 3vw!important}.header-kvs-mark,.header-bsg-mark{width:48px;height:48px;font-size:16px}.header-bsg-mark{font-size:26px}.header-bsg-mark small{font-size:6px}.header-school-name>b{font-size:8px}.header-school-name h1{font-size:16px}.header-school-name p{font-size:10px}.header-school-name small{font-size:8px}.kvs-public-nav a{font-size:11px!important;padding:12px 10px!important}.kvs-public-nav .kvs-nav-login{margin-left:0}}
+
+.member-export-tools{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:12px 0 16px;padding:12px 14px;background:#f6f2fa;border:1px solid #e2d5ed;border-radius:8px}
+.member-export-tools span{font-size:12px;font-weight:800;color:#4b0d78;margin-right:auto}
+.member-export-tools button{font-size:12px}
+@media(max-width:600px){.member-export-tools{align-items:stretch}.member-export-tools span{width:100%}.member-export-tools button{flex:1}}
