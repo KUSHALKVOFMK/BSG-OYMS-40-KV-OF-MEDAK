@@ -412,3 +412,15 @@ th{background:#f4f0f8;color:#51465e}
 .patrol-export-row button{font-size:11px}
 .bulk-login-import .table-wrap{margin:16px 0}
 @media(max-width:700px){.patrol-export-row{align-items:stretch}.patrol-export-row button{width:100%}}
+
+/* KVS institutional masthead shared with the 2.0 portal */
+.top-ribbon{min-height:38px;height:auto;background:#4b0d78!important;padding:8px 2.2vw!important;font-size:11px;letter-spacing:.25px}
+.welcome-header{background:#fff!important;color:#321657!important;display:grid;grid-template-columns:105px minmax(0,1fr) 100px;gap:18px;padding:14px 2.2vw!important;border-bottom:3px solid #d6a638!important;align-items:center}
+.header-kvs-mark,.header-bsg-mark{width:82px;height:82px;border:2px solid #d6a638;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;color:#4b0d78;font-weight:900;font-size:24px;box-shadow:0 2px 9px #4b0d7810}
+.header-school-name{text-align:center}.header-school-name>b{font-size:12px;letter-spacing:1.5px;color:#4b0d78}.header-school-name h1{font:800 clamp(21px,2.6vw,32px) Manrope,Arial,sans-serif;color:#4b0d78;margin:4px 0}.header-school-name p{font-size:13px;color:#65516f;margin:3px}.header-school-name small{font-size:12px;font-weight:800;color:#4b0d78;letter-spacing:.6px}
+.header-bsg-mark{font-size:44px;color:#19813c;display:flex;flex-direction:column;line-height:1}.header-bsg-mark small{font-size:8px;color:#321657;text-align:center;line-height:1.25;margin-top:4px}
+.kvs-public-nav{background:#4b0d78!important;border-bottom:0!important;display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding:0 1.5vw!important}
+.kvs-public-nav a{color:#fff!important;white-space:nowrap;padding:15px 14px!important;border-right:1px solid #ffffff25;font-size:13px!important}
+.kvs-public-nav a:hover{background:#6815a0!important;color:#fff!important}
+.kvs-public-nav .kvs-nav-login{margin-left:auto;background:#8618bd!important;border-radius:5px 5px 0 0;font-weight:800}
+@media(max-width:700px){.top-ribbon{font-size:9px;gap:8px;flex-wrap:wrap}.ribbon-tools{display:none}.welcome-header{grid-template-columns:52px 1fr 52px;gap:7px;padding:10px 3vw!important}.header-kvs-mark,.header-bsg-mark{width:48px;height:48px;font-size:16px}.header-bsg-mark{font-size:26px}.header-bsg-mark small{font-size:6px}.header-school-name>b{font-size:8px}.header-school-name h1{font-size:16px}.header-school-name p{font-size:10px}.header-school-name small{font-size:8px}.kvs-public-nav a{font-size:11px!important;padding:12px 10px!important}.kvs-public-nav .kvs-nav-login{margin-left:0}}
