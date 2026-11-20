@@ -424,3 +424,8 @@ th{background:#f4f0f8;color:#51465e}
 .kvs-public-nav a:hover{background:#6815a0!important;color:#fff!important}
 .kvs-public-nav .kvs-nav-login{margin-left:auto;background:#8618bd!important;border-radius:5px 5px 0 0;font-weight:800}
 @media(max-width:700px){.top-ribbon{font-size:9px;gap:8px;flex-wrap:wrap}.ribbon-tools{display:none}.welcome-header{grid-template-columns:52px 1fr 52px;gap:7px;padding:10px 3vw!important}.header-kvs-mark,.header-bsg-mark{width:48px;height:48px;font-size:16px}.header-bsg-mark{font-size:26px}.header-bsg-mark small{font-size:6px}.header-school-name>b{font-size:8px}.header-school-name h1{font-size:16px}.header-school-name p{font-size:10px}.header-school-name small{font-size:8px}.kvs-public-nav a{font-size:11px!important;padding:12px 10px!important}.kvs-public-nav .kvs-nav-login{margin-left:0}}
+
+.member-export-tools{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:12px 0 16px;padding:12px 14px;background:#f6f2fa;border:1px solid #e2d5ed;border-radius:8px}
+.member-export-tools span{font-size:12px;font-weight:800;color:#4b0d78;margin-right:auto}
+.member-export-tools button{font-size:12px}
+@media(max-width:600px){.member-export-tools{align-items:stretch}.member-export-tools span{width:100%}.member-export-tools button{flex:1}}
