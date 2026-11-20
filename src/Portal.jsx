@@ -762,8 +762,12 @@ export default function Portal(){
   ]:[["profile-setup","Complete Profile",UserCircle]];
 
   if(page==="welcome") return <div className="welcome-page" id="portal-home">
-    <div className="top-ribbon"><span>BHARAT SCOUTS & GUIDES · OFFICIAL SCHOOL UNIT PORTAL</span><span>2026–27</span></div>
-    <header className="welcome-header"><div className="crest">BSG</div><div><b>PM SHRI KENDRIYA VIDYALAYA</b><h1>Ordnance Factory Medak</h1><p>Eddumailaram · Hyderabad Division</p><small>BHARAT SCOUTS & GUIDES · KVS</small></div><div className="header-mark">OYMS<br/><small>SANKALP 4.0</small></div></header>
+    <div className="top-ribbon"><span>Kendriya Vidyalaya Sangathan &nbsp; | &nbsp; Ministry of Education, Government of India</span><span className="ribbon-tools">A+ &nbsp; A &nbsp; A− &nbsp; | &nbsp; English &nbsp; | &nbsp; Login</span></div>
+    <header className="welcome-header">
+      <div className="header-kvs-mark" aria-label="Kendriya Vidyalaya Sangathan">KVS</div>
+      <div className="header-school-name"><b>PM SHRI KENDRIYA VIDYALAYA</b><h1>Ordnance Factory Medak</h1><p>Eddumailaram · Hyderabad Division</p><small>BHARAT SCOUTS &amp; GUIDES (B.S.&amp;G.)</small></div>
+      <div className="header-bsg-mark" aria-label="Bharat Scouts and Guides">⚜<small>BHARAT SCOUTS<br/> &amp; GUIDES</small></div>
+    </header>
     <nav className="kvs-public-nav" aria-label="Main website navigation">
       <a href="#portal-home">Home</a><a href="#about-bsg">About BSG</a><a href="#scouts">Scouts</a><a href="#guides">Guides</a><a href="#cubs">Cubs</a><a href="#bulbuls">Bulbuls</a><a href="#public-notices">Notices</a><a className="kvs-nav-login" href="#portal-login">Portal Login <ArrowRight size={14}/></a>
     </nav>
