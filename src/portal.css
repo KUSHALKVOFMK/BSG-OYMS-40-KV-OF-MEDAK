@@ -323,3 +323,11 @@ th{background:#edf5f9;color:#45677f}.status-verified{background:#e8f6ef}
 .needs-changes-shortcut small{font-size:11px;color:#815b5b}
 @media(max-width:760px){.workflow-click-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.workflow-click-grid>button{min-height:96px;padding:11px}.verification-view-tabs{flex-wrap:wrap}}
 @media(max-width:420px){.workflow-click-grid{grid-template-columns:1fr 1fr;gap:8px}.workflow-click-grid>button b{font-size:22px}}
+
+/* SAMAGAM-inspired direct Administrator entry and responsive login actions */
+.portal-login-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.portal-login-actions button{min-height:48px}
+.portal-login-actions .portal-login-admin{background:#293b91;box-shadow:0 7px 18px #293b9126}
+.portal-login-actions .portal-login-admin:hover{background:#1f2f79}
+.portal-login-actions .outline.large{padding:14px 20px;border:1px solid #cbd6e6;border-radius:4px;background:#fff;color:#293b91;font-weight:800;letter-spacing:.4px}
+@media(max-width:650px){.portal-login-strip{align-items:stretch;flex-direction:column}.portal-login-actions{width:100%;display:grid;grid-template-columns:1fr}.portal-login-actions button{width:100%}}
