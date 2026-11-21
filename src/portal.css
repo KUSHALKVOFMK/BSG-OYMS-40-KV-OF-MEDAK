@@ -492,3 +492,8 @@ th{background:#f4f0f8;color:#51465e}
  .header-portal-brand b{font-size:10px}
  .header-portal-brand small{font-size:6px;margin-top:2px}
 }
+
+/* Super Admin managed single-image header: image artwork contains all branding/text */
+.welcome-header.has-custom-portal-header{background-position:center;background-repeat:no-repeat;background-size:cover;min-height:150px;position:relative;overflow:hidden}
+.welcome-header.has-custom-portal-header>*{display:none!important}
+@media(max-width:700px){.welcome-header.has-custom-portal-header{min-height:105px;background-size:cover}}
