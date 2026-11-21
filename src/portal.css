@@ -506,3 +506,8 @@ th{background:#f4f0f8;color:#51465e}
 .welcome-footer .footer-disclaimer>b{display:block;font-size:13px;letter-spacing:.7px;margin-bottom:7px}
 .welcome-footer .footer-disclaimer p{margin:0 auto 7px;max-width:1000px;font-size:12px}
 .welcome-footer .footer-disclaimer span{display:block;font-size:11px;opacity:.85}
+
+/* Purple footer for SANKALP 4.0 disclaimer */
+.welcome-footer{background:#4b1178!important;color:#fff!important;border-top:3px solid #d5a126!important}
+.welcome-footer .footer-disclaimer,.welcome-footer .footer-disclaimer p,.welcome-footer .footer-disclaimer span{color:#fff!important}
+.welcome-footer .footer-disclaimer b{color:#fff!important}
