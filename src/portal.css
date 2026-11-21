@@ -436,3 +436,32 @@ th{background:#f4f0f8;color:#51465e}
 .staff-login-toggle{display:block;margin:18px auto 0;padding:8px 12px;border:0;background:transparent;color:#786b87;text-decoration:underline;font-size:11px;cursor:pointer}
 .staff-login-options{display:grid;gap:10px;margin-top:10px;padding-top:12px;border-top:1px solid #eee5f4}
 .staff-login-options .role-choice{min-height:68px;padding:11px 13px}
+
+
+/* Public MENU: consistent purple styling across SANKALP 4.0 */
+.sidebar{
+  background:linear-gradient(160deg,#6b21a8 0%,#512080 52%,#32104f 100%) !important;
+  color:#fff !important;
+  border-right:3px solid #e9bb4d !important;
+}
+.sidebar nav button,
+.sidebar nav button span,
+.sidebar nav button svg{
+  color:#fff !important;
+}
+.sidebar nav button{
+  background:rgba(255,255,255,.12) !important;
+  border:1px solid rgba(255,255,255,.2) !important;
+}
+.sidebar nav button.active,
+.sidebar nav button:hover,
+.sidebar nav button:focus-visible{
+  background:rgba(255,255,255,.25) !important;
+  color:#fff !important;
+  border-color:#e9bb4d !important;
+}
+.side-bottom button{
+  background:#f2c14e !important;
+  color:#32104f !important;
+  border-color:#e9bb4d !important;
+}
