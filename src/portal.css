@@ -501,3 +501,8 @@ th{background:#f4f0f8;color:#51465e}
 /* Use the actual BSG emblem instead of a decorative fleur-de-lis */
 .header-bsg-mark{border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:3px!important}
 .header-bsg-mark img{display:block;width:100%;height:100%;object-fit:contain}
+
+.welcome-footer .footer-disclaimer{max-width:1100px;margin:0 auto;text-align:center;line-height:1.55}
+.welcome-footer .footer-disclaimer>b{display:block;font-size:13px;letter-spacing:.7px;margin-bottom:7px}
+.welcome-footer .footer-disclaimer p{margin:0 auto 7px;max-width:1000px;font-size:12px}
+.welcome-footer .footer-disclaimer span{display:block;font-size:11px;opacity:.85}
