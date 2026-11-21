@@ -18,6 +18,7 @@ const isTemporaryLaunchDay = () => new Intl.DateTimeFormat("en-CA",{timeZone:"As
 
 export default function Portal(){
   const [page,setPage] = useState("welcome");
+  const [isDemo,setIsDemo] = useState(false);
   const [welcomeSlide,setWelcomeSlide] = useState(0);
   const [notificationPopup,setNotificationPopup] = useState(false);
   const [publicNotices,setPublicNotices] = useState([]);
@@ -107,7 +108,7 @@ export default function Portal(){
   useEffect(()=>{ loadPublicNotices(); },[]);
   useEffect(()=>{ loadHomepageSlides(); const refreshSlides=()=>loadHomepageSlides(); window.addEventListener("focus",refreshSlides); const refreshTimer=setInterval(refreshSlides,45000); return ()=>{window.removeEventListener("focus",refreshSlides);clearInterval(refreshTimer);}; },[]);
   useEffect(()=>{if(profile?.role==="super_admin"&&tab==="launch")loadLaunchAnnouncements();},[profile?.role,tab]);
-  useEffect(()=>{if(page!=="app"||!user?.id||!profile?.role)return;const sync=()=>{if(document.visibilityState==="visible")refreshData(profile.role,user.id,true);};const timer=setInterval(sync,10000);window.addEventListener("focus",sync);document.addEventListener("visibilitychange",sync);return()=>{clearInterval(timer);window.removeEventListener("focus",sync);document.removeEventListener("visibilitychange",sync);};},[page,user?.id,profile?.role]);
+  useEffect(()=>{if(isDemo||page!=="app"||!user?.id||!profile?.role)return;const sync=()=>{if(document.visibilityState==="visible")refreshData(profile.role,user.id,true);};const timer=setInterval(sync,10000);window.addEventListener("focus",sync);document.addEventListener("visibilitychange",sync);return()=>{clearInterval(timer);window.removeEventListener("focus",sync);document.removeEventListener("visibilitychange",sync);};},[page,user?.id,profile?.role]);
   function startTemporaryPortalLaunch(){
     if(!isSuperAdmin)return;
     setMobileMenu(false);setPage("welcome");setWelcomeSlide(0);setLaunchCountdownValue(10);setLaunchCountdownOpen(true);
@@ -190,6 +191,7 @@ export default function Portal(){
   }
   function closeAnnouncement(){setAnnouncementOpen(false);setActiveAnnouncement(null);setConfettiOn(true);window.setTimeout(()=>setConfettiOn(false),5000);}
   async function refreshData(role,userId,silent=false){
+    if(isDemo)return;
     if(!silent)setLoading(true);
     if(role==="super_admin"){
       const [admins,requests]=await Promise.all([
@@ -347,6 +349,12 @@ export default function Portal(){
 
   async function signIn(e){
     e.preventDefault(); setLoading(true); setMessage("");
+    if(loginType==="patrol" && loginId.trim().toUpperCase()==="DEMO" && password==="HIPEOPLE"){
+      setIsDemo(true);setLoading(false);setMessage("");setUser({id:"local-demo-session",email:"demo@local.invalid"});
+      setProfile({role:"patrol_leader",full_name:"Demo Patrol Leader",login_id:"DEMO",patrol_name:"Demo Combined Patrol",category:"Scout",is_active:true});
+      setLeaders([]);setSubmissions([]);setNotifications([]);setAudit([]);setMemberRows([]);setMembershipChecks([]);setUnfreezeRequests([]);
+      setTab("dashboard");setPage("app");setMessage("DEMO MODE — sample-only session. Nothing is saved or sent to the database.");return;
+    }
     const identity = (loginType==="patrol"||loginType==="admin") ? loginId.trim().toLowerCase()+"@oyms.local" : loginId.trim().toLowerCase();
     if(loginType==="super_admin" && identity!==ADMIN_EMAIL){setLoading(false);setMessage("Enter the registered Super Admin email address.");return;}
     const {data,error}=await supabase.auth.signInWithPassword({email:identity,password});
@@ -355,7 +363,7 @@ export default function Portal(){
     await enterPortal(data.user);
   }
 
-  async function signOut(){await supabase.auth.signOut();setUser(null);setProfile(null);setPage("welcome");setLoginType("");setPassword("");setLoginId("");setMessage("");}
+  async function signOut(){if(!isDemo)await supabase.auth.signOut();setIsDemo(false);setUser(null);setProfile(null);setPage("welcome");setLoginType("");setPassword("");setLoginId("");setMessage("");}
 
   function generateTemporaryPassword(){
     const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
@@ -820,6 +828,12 @@ export default function Portal(){
     {loginType==="super_admin"&&<><button className="link-button" onClick={async()=>{if(!loginId.trim()){setMessage("Enter your Super Admin email first.");return;}setLoading(true);const {error}=await supabase.auth.resetPasswordForEmail(loginId.trim().toLowerCase());setLoading(false);setMessage(error?error.message:"If this email has an OYMS account, a password reset link has been sent.");}}>Forgot password?</button><button className="link-button" onClick={requestAdminActivation} disabled={loading}>First-time Super Admin? Send secure activation link</button></>}
     {message&&<div className="notice-message"><AlertCircle size={16}/>{message}</div>}<div className="security-line"><LockKeyhole size={15}/> Your role is checked by the secure database after sign-in.</div></div></div>;
 
+  if(page==="app" && isDemo && user && profile) return <div className="app-layout">
+    <aside className="sidebar"><div className="side-brand"><div className="mini-crest">BSG</div><div><b>OYMS SANKALP 4.0</b><small>DEMO PATROL LEADER</small></div></div><nav><button className="active"><Home size={17}/>Dashboard</button><button onClick={()=>setMessage("Preview only — member records are disabled and nothing is saved.")}><Users size={17}/>My Patrol (Preview)</button><button onClick={()=>setMessage("Preview only — verification is disabled.")}><ShieldCheck size={17}/>Verification (Preview)</button></nav><div className="side-bottom"><b>Demo Patrol Leader</b><small>DEMO · Demo Combined Patrol</small><button onClick={signOut}><LogOut size={16}/> Exit Demo</button></div></aside>
+    <section className="app-main"><header className="app-top"><div><b>Demo Patrol Leader Dashboard</b><small>PM SHRI KV OF Medak · SANKALP 4.0</small></div><span className="status status-pending">DEMO ONLY</span></header>
+    <main className="app-content"><div className="notice-message"><AlertCircle size={16}/> DEMO MODE: sample figures only. No information is connected to or saved in the school database.</div><section className="welcome-banner"><span className="eyebrow">PATROL LEADER · DEMONSTRATION</span><h1>Welcome, Demo Patrol Leader</h1><p>Demo Combined Patrol · Scout category · Temporary visual preview only.</p></section>
+    <div className="stat-grid"><article className="stat-card"><Users/><div><strong>08</strong><small>Sample Patrol Capacity</small></div></article><article className="stat-card"><ClipboardList/><div><strong>03</strong><small>Sample Profiles</small></div></article><article className="stat-card"><Clock3/><div><strong>02</strong><small>Sample Pending Checks</small></div></article><article className="stat-card"><CheckCircle2/><div><strong>01</strong><small>Sample Verified</small></div></article></div>
+    <section className="panel"><h3>Demo Preview</h3><p className="empty">Explore the dashboard layout and navigation. Member entry, uploads, UID updates and approvals are intentionally disabled in this database-free demo.</p><button className="primary" onClick={signOut}>Exit Demo</button></section></main><footer className="app-footer">SANKALP 4.0 · DEMONSTRATION ONLY · No data is stored</footer></section></div>;
   if(page==="app" && user && profile) return <div className="app-layout">
     <aside className={"sidebar "+(mobileMenu?"show":"")}><div className="side-brand"><div className="mini-crest">BSG</div><div><b>OYMS SANKALP 4.0</b><small>{isSuperAdmin?"SUPER ADMIN":isAdmin?"ADMIN":"PATROL LEADER"}</small></div><button className="close-menu" onClick={()=>setMobileMenu(false)}><X/></button></div><nav>{nav.map(([id,label,Icon])=><button key={id} className={tab===id?"active":""} onClick={()=>{setTab(id);setMobileMenu(false);}}><Icon size={17}/>{label}</button>)}</nav><div className="side-bottom"><b>{profile.full_name}</b><small>{profile.login_id} · {profile.patrol_name||"Admin"}</small><button onClick={signOut}><LogOut size={16}/> Sign out</button></div></aside>
     <section className="app-main"><header className="app-top"><button className="menu-button" onClick={()=>setMobileMenu(!mobileMenu)}><Menu/></button><div><b>{nav.find(x=>x[0]===tab)?.[1]||"Dashboard"}</b><small>{SCHOOL}</small></div><div className="notification-menu"><button className={"notification-bell "+(notificationPopup?"opened":"")} aria-label="Open notifications" onClick={()=>setNotificationPopup(v=>!v)}><Bell size={19}/>{activeNotifications.filter(x=>!x.read_at).length>0&&<span className="notification-count">{notifications.filter(x=>!x.read_at).length}</span>}</button>{notificationPopup&&<div className="notification-popover"><div className="notification-popover-head"><b>Notifications</b><button onClick={()=>{setNotificationPopup(false);setTab("notifications");}}>View all</button></div>{activeNotifications.slice(0,4).map(x=><button className="notification-popover-item" key={x.id} onClick={()=>{setNotificationPopup(false);setTab("notifications");}}><b>{x.title}</b><small>{x.message}</small><time>{dateLabel(x.created_at)}</time></button>)}{!activeNotifications.length&&<p className="empty">No new notifications.</p>}</div>}</div><button className="refresh" onClick={()=>refreshData(profile.role,user.id)}><RefreshCw size={17}/></button></header>
