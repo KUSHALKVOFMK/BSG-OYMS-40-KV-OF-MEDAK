@@ -497,3 +497,7 @@ th{background:#f4f0f8;color:#51465e}
 .welcome-header.has-custom-portal-header{background-position:center;background-repeat:no-repeat;background-size:cover;min-height:150px;position:relative;overflow:hidden}
 .welcome-header.has-custom-portal-header>*{display:none!important}
 @media(max-width:700px){.welcome-header.has-custom-portal-header{min-height:105px;background-size:cover}}
+
+/* Use the actual BSG emblem instead of a decorative fleur-de-lis */
+.header-bsg-mark{border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:3px!important}
+.header-bsg-mark img{display:block;width:100%;height:100%;object-fit:contain}
